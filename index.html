@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haystack</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--primary);
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        h1 {
+            color: var(--primary);
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 0.5rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        /* --- DRAG & DROP STYLES --- */
+        .upload-area {
+            border: 2px dashed #bdc3c7;
+            border-radius: 6px;
+            padding: 3rem 2rem;
+            text-align: center;
+            margin: 1.5rem 0;
+            transition: all 0.3s ease;
+            position: relative;
+            background-color: #fafafa;
+        }
+
+        .upload-area.highlight {
+            border-color: var(--accent);
+            background-color: #e8f4f8;
+            transform: scale(1.01);
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            display: block;
+            color: #bdc3c7;
+        }
+        
+        .upload-text {
+            display: block;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        input[type="file"] {
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+        /* -------------------------- */
+
+        .controls {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background-color: #f1f3f5;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 1rem;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-family: monospace;
+            resize: vertical;
+            box-sizing: border-box; 
+        }
+
+        button.copy-btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        button.copy-btn:hover {
+            background-color: #2980b9;
+        }
+
+        /* FAQ Styling */
+        details {
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+
+        summary {
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0.5rem 0;
+            list-style: none;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        summary::before {
+            content: "►";
+            position: absolute;
+            left: 0;
+            font-size: 0.8rem;
+            top: 0.6rem;
+            transition: transform 0.2s;
+        }
+
+        details[open] summary::before {
+            transform: rotate(90deg);
+        }
+
+        .status-msg {
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+
+        .error { color: #e74c3c; }
+        .success { color: #27ae60; }
+
+        /* Toggle Switch Styling */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 24px;
+        }
+
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(16px);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Haystack - an LLM prompt generator for gene analysis</h1>
+    <p>This tool checks a 23andMe or Ancestry.com raw data file against a preset list of genetic mutations that have mental health implications. It outputs a prompt that can be pasted into an LLM of your choice to do further analysis. This tool does not require internet access and your data is processed locally on your own machine. Of course, once you take the output and place it into an LLM, the data leaves your machine at that point. See the FAQ below for more info.</p>
+
+    <div class="card">
+        <h3>1. Attach Data File</h3>
+        <p>Select your 23andMe or Ancestry raw data file. File can be zipped or unzipped, it does not matter.</p>
+        
+        <div id="drop-area" class="upload-area">
+            <span class="upload-icon">📂</span>
+            <span class="upload-text">drag & drop file here or click below</span>
+            <input type="file" id="fileInput" accept=".txt, .zip, .csv">
+            <div id="status" class="status-msg"></div>
+        </div>
+
+        <h3>2. Include a pre-made prompt with your data?</h3>
+        <div class="controls">
+            <label class="switch">
+                <input type="checkbox" id="promptToggle" checked>
+                <span class="slider"></span>
+            </label>
+            <span>Include example LLM prompt with data output</span>
+        </div>
+
+        <h3>3. Results</h3>
+        <textarea id="output" readonly placeholder="Results will appear here..."></textarea>
+        <button class="copy-btn" onclick="copyToClipboard()">Copy to Clipboard</button>
+    </div>
+
+    <div class="card">
+        <h3>FAQ</h3>
+        
+        <details>
+            <summary>Should I trust what the LLM tells me about my genes?</summary>
+            <p>No, probably not. Every single part of this process is extremely prone to errors. There could be errors in the raw data file that you got from 23andMe or Ancestry. They are doing genetics very inexpensively and in a low-stakes arena (ie, if they tell you that you are Italian rather than Irish, nobody dies), so errors are possible. It is amazing they can do gene analysis at all at the prices they sell the kits at; perfection should not be expected at this price. Then you are putting that potentially flawed file into this tool that was completely vibe coded, and is using a reference list of SNPs that was assembled by hand by an amateur. This tool probably will introduce more errors. And then of course, the LLM itself is very prone to be short-sighted or hallucinate entirely. Ultimately, you are probably about as likely to get good advice from consulting tarot cards as you are from putting the output of this tool into an LLM. Be very skeptical.</p>
+        </details>
+
+        <details>
+            <summary>Should I take health advice from an LLM?</summary>
+            <p>No, don't do that. Ideally, you should consult a functional health practioner or an expert in genetic medicine. However, from my experience it seems we are still in the dark ages of functional  medicine and it can be quite tough to find a functional health doctor that actually knows very much. Hopefully this is a field that will continue to add experts and eject charlatans as we move into the future, but currently it is still pretty rough out there. At the present moment I hesitate to take health advice from either LLMs or most functional health people. But yeah, be smart and do not treat anything that an LLM tells you as medical advice.</p>
+        </details>
+
+        <details>
+            <summary>Should I put my genetic information into an LLM at all?</summary>
+            <p>No, probably not. The privacy implications of putting your genetic information into an LLM are not very good.</p>
+        </details>
+
+        <details>
+            <summary>What LLM should I use?</summary>
+            <p>I've been using Gemini 3 Pro and it does a pretty good job. It does hallucinate sometimes, but overall I've been impressed by it. It requires a little coaching and coaxing, but is capable of doing some insightful analysis. It also makes really bad mistakes sometimes, and is not very good at noticing contradictory recommendations without the user asking for a lot of double-checking or having pre-existing knowledge that they can use to sanity check what they are being told. I find that it does a lot better when asked specific questions rather than broad, general questions.</p>
+        </details>
+        
+        <details>
+            <summary>How can I learn more?</summary>
+            <p>If you find all of this interesting and would like to investigate genes in a better way, I would recommend checking out GeneticLifeHacks.com. She writes interesting articles, sticks close to the science, does not shill supplements, and her site processes your data locally similar to this tool (your genetic data is never uploaded to a server). I am a huge fan of the GeneticLifeHacks site and do not think there is a better tool available for the person who is curious about genetics. This little tool (and the LLM-powered analysis it enables) are a botch job by comparison. Another somewhat decent thing to check out is StrateGene. I am not a huge fan of the "clean vs dirty" distinction they use, it oversimplifies things to the point of meaninglessness. And they also sell supplements which is suspicious. But the StrateGene report itself is pretty cool and contains some nice diagrams and useful info.</p>
+        </details>
+
+        <details>
+            <summary>Why didn't you include SNP [my favorite SNP]?</summary>
+            <p>I got tired of adding SNPs and felt like I was already past the point of diminishing returns in terms of what the LLM was actually able to process, but if you have a cool SNP that you think should be included please let me know.</p>
+        </details>
+
+        <details>
+            <summary>What are some good follow-up questions I can ask the LLM?</summary>
+            <p>Whatever you are curious about. I often ask how a specific drug or supplement might affect me, given my genes. It is also interesting to ask about what lifestyle interventions might be the most effective. You can ask about specific symptoms you are experiencing and see which genes are most likely causing them. The initial overview that the LLM returns is often very broad and non-specific, so you really do need to follow up with more specific questions to get any useful info.</p>
+        </details>
+    </div>
+
+    <script>
+        // --- CONFIGURATION: EDIT THIS LIST TO CHANGE TARGETS ---
+	// --- GENES MARKED AS TARGET X ARE ALWAYS RETURNED (USEFUL WHEN A GENOTYPE ALWAYS HAS A MENTAL HEALTH IMPLICATION WHETHER IT IS MUTANT OR WILD TYPE) ---
+        const TARGET_SNPS = [
+{ rsid: "rs1001179", target: "T" },
+{ rsid: "rs1002149", target: "T" },
+{ rsid: "rs10109853", target: "T" },
+{ rsid: "rs10156191", target: "T" },
+{ rsid: "rs1042713", target: "A" },
+{ rsid: "rs1042714", target: "G" },
+{ rsid: "rs1049353", target: "T" },
+{ rsid: "rs1051266", target: "T" },
+{ rsid: "rs1062613", target: "T" },
+{ rsid: "rs1076560", target: "A" },
+{ rsid: "rs10770141", target: "A" },
+{ rsid: "rs10830963", target: "G" },
+{ rsid: "rs1137070", target: "X" },
+{ rsid: "rs1138272", target: "T" },
+{ rsid: "rs11509438", target: "A" },
+{ rsid: "rs11558538", target: "T" },
+{ rsid: "rs11662595", target: "G" },
+{ rsid: "rs1176744", target: "C" },
+{ rsid: "rs121908331", target: "C" },
+{ rsid: "rs121964962", target: "T" },
+{ rsid: "rs121964970", target: "T" },
+{ rsid: "rs12248560", target: "T" },
+{ rsid: "rs1229984", target: "T" },
+{ rsid: "rs12364283", target: "G" },
+{ rsid: "rs13182402", target: "G" },
+{ rsid: "rs1360780", target: "T" },
+{ rsid: "rs1390938", target: "A" },
+{ rsid: "rs1532268", target: "T" },
+{ rsid: "rs156697", target: "A" },
+{ rsid: "rs1611115", target: "T" },
+{ rsid: "rs165599", target: "X" },
+{ rsid: "rs1695", target: "G" },
+{ rsid: "rs1799836", target: "X" },
+{ rsid: "rs1799913", target: "T" },
+{ rsid: "rs1799971", target: "G" },
+{ rsid: "rs1800440", target: "C" },
+{ rsid: "rs1800497", target: "A" },
+{ rsid: "rs1800629", target: "A" },
+{ rsid: "rs1800668", target: "A" },
+{ rsid: "rs1800779", target: "G" },
+{ rsid: "rs1800888", target: "T" },
+{ rsid: "rs1801131", target: "G" },
+{ rsid: "rs1801133", target: "A" },
+{ rsid: "rs1801198", target: "G" },
+{ rsid: "rs1801253", target: "G" },
+{ rsid: "rs1801260", target: "G" },
+{ rsid: "rs1801279", target: "A" },
+{ rsid: "rs1801394", target: "G" },
+{ rsid: "rs1805087", target: "G" },
+{ rsid: "rs2052129", target: "T" },
+{ rsid: "rs2070744", target: "C" },
+{ rsid: "rs2070762", target: "G" },
+{ rsid: "rs2228093", target: "T" },
+{ rsid: "rs2236225", target: "A" },
+{ rsid: "rs2236624", target: "T" },
+{ rsid: "rs2242446", target: "C" },
+{ rsid: "rs2243828", target: "G" },
+{ rsid: "rs2311013", target: "X" },
+{ rsid: "rs234706", target: "A" },
+{ rsid: "rs279858", target: "C" },
+{ rsid: "rs28934891", target: "T" },
+{ rsid: "rs28941785", target: "T" },
+{ rsid: "rs28941786", target: "G" },
+{ rsid: "rs324420", target: "A" },
+{ rsid: "rs34324219", target: "A" },
+{ rsid: "rs3733890", target: "A" },
+{ rsid: "rs3813929", target: "T" },
+{ rsid: "rs3892097", target: "T" },
+{ rsid: "rs3918226", target: "T" },
+{ rsid: "rs3957357", target: "A" },
+{ rsid: "rs398123151", target: "A" },
+{ rsid: "rs4244285", target: "A" },
+{ rsid: "rs429358", target: "C" },
+{ rsid: "rs4570625", target: "T" },
+{ rsid: "rs4633", target: "X" },
+{ rsid: "rs4680", target: "X" },
+{ rsid: "rs4820599", target: "G" },
+{ rsid: "rs4880", target: "A" },
+{ rsid: "rs4920037", target: "A" },
+{ rsid: "rs4925", target: "A" },
+{ rsid: "rs4994", target: "G" },
+{ rsid: "rs526934", target: "G" },
+{ rsid: "rs53576", target: "A" },
+{ rsid: "rs5569", target: "A" },
+{ rsid: "rs5905512", target: "X" },
+{ rsid: "rs61735836", target: "T" },
+{ rsid: "rs6265", target: "T" },
+{ rsid: "rs6267", target: "X" },
+{ rsid: "rs6280", target: "C" },
+{ rsid: "rs6295", target: "X" },
+{ rsid: "rs6311", target: "T" },
+{ rsid: "rs6313", target: "A" },
+{ rsid: "rs6323", target: "X" },
+{ rsid: "rs6347", target: "C" },
+{ rsid: "rs662", target: "X" },
+{ rsid: "rs671", target: "A" },
+{ rsid: "rs713041", target: "T" },
+{ rsid: "rs72558181", target: "T" },
+{ rsid: "rs73598374", target: "T" },
+{ rsid: "rs737280", target: "C" },
+{ rsid: "rs7493", target: "C" },
+{ rsid: "rs762551", target: "C" },
+{ rsid: "rs769217", target: "T" },
+{ rsid: "rs7946", target: "T" },
+{ rsid: "rs854560", target: "T" },
+{ rsid: "rs901865", target: "T" },
+{ rsid: "rs9606756", target: "G" },
+{ rsid: "rs9932581", target: "T" },
+{ rsid: "rs3800373", target: "C" },
+{ rsid: "rs11030101", target: "T" },
+{ rsid: "rs7103411", target: "C" },
+{ rsid: "rs1042778", target: "T" },
+{ rsid: "rs2268491", target: "T" },
+{ rsid: "rs1544410", target: "T" },
+{ rsid: "rs3749034", target: "A" },
+{ rsid: "rs174546", target: "T" },
+{ rsid: "rs1535", target: "G" },
+{ rsid: "rs1049742", target: "T" },
+{ rsid: "rs4307059", target: "T" },
+{ rsid: "rs2235544", target: "A" },
+{ rsid: "rs891512", target: "A" },
+{ rsid: "rs1064395", target: "A" },
+{ rsid: "rs4654748", target: "C" },
+{ rsid: "rs3923809", target: "A" },
+{ rsid: "rs601338", target: "A" },
+{ rsid: "rs279871", target: "T" },
+{ rsid: "rs1800795", target: "C" },
+{ rsid: "rs2234693", target: "T" },
+{ rsid: "rs7412", target: "C" },
+{ rsid: "rs225014", target: "C" },
+{ rsid: "rs3746544", target: "T" },
+{ rsid: "rs366631", target: "A" },
+{ rsid: "rs7171755", target: "A" },
+{ rsid: "rs10994336", target: "T" },
+{ rsid: "rs1938526", target: "G" },
+{ rsid: "rs6296", target: "G" },
+{ rsid: "rs6314", target: "A" },
+{ rsid: "rs1800796", target: "G" },
+{ rsid: "rs1800797", target: "A" },
+{ rsid: "rs4129267", target: "C" },
+{ rsid: "rs16944", target: "G" },
+{ rsid: "rs140701", target: "T" },
+{ rsid: "rs10875995", target: "C" },
+{ rsid: "rs685012", target: "C" },
+{ rsid: "rs11754661", target: "A" },
+{ rsid: "rs1106634", target: "A" },
+{ rsid: "rs110402", target: "G" },
+{ rsid: "rs242924", target: "G" },
+{ rsid: "rs242941", target: "A" },
+{ rsid: "rs242939", target: "T" },
+{ rsid: "rs5751876", target: "T" },
+{ rsid: "rs5443", target: "T" },
+{ rsid: "rs3027452", target: "X" },
+{ rsid: "rs979605", target: "X" },
+{ rsid: "rs2638315", target: "G" },
+{ rsid: "rs301430", target: "C" },
+{ rsid: "rs3808606", target: "A" },
+{ rsid: "rs9657182", target: "C" },
+{ rsid: "rs4503083", target: "A" },
+{ rsid: "rs2279020", target: "G" },
+{ rsid: "rs4532", target: "C" },
+{ rsid: "rs5326", target: "T" },
+{ rsid: "rs686", target: "G" },
+{ rsid: "rs6277", target: "A" },
+{ rsid: "rs1801028", target: "C" },
+{ rsid: "rs1800955", target: "C" },
+{ rsid: "rs27072", target: "T" },
+{ rsid: "rs1049793", target: "G" },
+{ rsid: "rs1050891", target: "A" },
+{ rsid: "rs2071048", target: "T" },
+{ rsid: "rs1041740", target: "T" },
+{ rsid: "rs1295686", target: "T" },
+{ rsid: "rs6925344", target: "T" },
+{ rsid: "rs1800566", target: "A" },
+        ];
+
+        // --- PLACEHOLDER PROMPT TEXT ---
+        const PROMPT_TEXT = "Please act as an expert in nutrigenomics, genetic analysis, functional medicine, and mental health. I have filtered my raw DNA file to find specific variants of interest which I will attach to the end of this prompt. Please consider the effects that each of these SNPs have on the brain and body, with an emphasis on neurochemical effects and mental health implications. Once you have considered each SNP individually, please consider the mechanisms and pathways involved in order to understand how all of these SNPs interact and what the cumulative effect is. Where complex chemical pathways have parts that are upregulated and parts that are downregulated, try to understand exactly where the bottlenecks occur and what the consequences might be. Topics you may want to consider are methylation, transsulfuration, COMT, serotonin, dopamine, norepinephrine, cortisol, histamine, estrogen, BDNF, oxytocin, ammonia, oxidation, inflammation, toxic metabolites, detox, etc. You are not limited to these topic areas though, please expand your analysis as wide as needed to address the genetic information given. If you are capable of retrieving information from the internet, you may need to do so to understand the effects of each SNP. The SNPs are:\n";
+
+        // --- DOM ELEMENTS ---
+        const fileInput = document.getElementById('fileInput');
+        const dropArea = document.getElementById('drop-area');
+        const statusDiv = document.getElementById('status');
+        const outputArea = document.getElementById('output');
+        const promptToggle = document.getElementById('promptToggle');
+
+        let parsedResults = []; 
+
+        // --- DRAG & DROP HANDLERS ---
+        
+        // Prevent default drag behaviors
+        ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // Highlight drop area when item is dragged over it
+        ;['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+
+        ;['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            dropArea.classList.add('highlight');
+        }
+
+        function unhighlight(e) {
+            dropArea.classList.remove('highlight');
+        }
+
+        // Handle Drop
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        // Handle Standard Click Input
+        fileInput.addEventListener('change', function(e) {
+            handleFiles(this.files);
+        });
+
+        // --- PROCESSING LOGIC ---
+
+        function handleFiles(files) {
+            const file = files[0];
+            if (!file) return;
+            startProcessing(file);
+        }
+
+        promptToggle.addEventListener('change', reformatOutput);
+
+        async function startProcessing(file) {
+            statusDiv.textContent = "Processing file...";
+            statusDiv.className = "status-msg";
+            outputArea.value = "";
+            parsedResults = [];
+
+            try {
+                let textContent = "";
+
+                if (file.name.endsWith('.zip')) {
+                    const zip = new JSZip();
+                    const loadedZip = await zip.loadAsync(file);
+                    const textFileName = Object.keys(loadedZip.files).find(name => name.endsWith('.txt') || name.endsWith('.csv'));
+                    
+                    if (!textFileName) {
+                        throw new Error("No .txt or .csv file found inside the zip archive.");
+                    }
+                    
+                    textContent = await loadedZip.file(textFileName).async("string");
+                } else {
+                    textContent = await file.text();
+                }
+
+                processGenetics(textContent);
+
+            } catch (err) {
+                console.error(err);
+                statusDiv.textContent = "Error: " + err.message;
+                statusDiv.className = "status-msg error";
+            }
+        }
+
+        function processGenetics(rawText) {
+            const userGenetics = new Map();
+            const lines = rawText.split('\n');
+
+            for (let line of lines) {
+                line = line.trim();
+                if (!line || line.startsWith('#') || line.startsWith('rsid')) continue; 
+
+                const parts = line.split(/\s+/);
+                
+                if (parts.length >= 4) {
+                    const rsid = parts[0];
+                    let genotype = "";
+
+                    // Ancestry (5 cols) vs 23andMe (4 cols)
+                    if (parts.length === 5) {
+                        genotype = parts[3] + parts[4]; 
+                    } else {
+                        genotype = parts[parts.length - 1];
+                    }
+                    
+                    if (genotype) {
+                        userGenetics.set(rsid, genotype);
+                    }
+                }
+            }
+
+            if (userGenetics.size === 0) {
+                throw new Error("Could not parse any genetic data. Please check the file format.");
+            }
+
+            parsedResults = [];
+
+            TARGET_SNPS.forEach(item => {
+                if (userGenetics.has(item.rsid)) {
+                    const userGenotype = userGenetics.get(item.rsid);
+                    
+                    let isMatch = false;
+
+                    if (item.target === "X") {
+                        isMatch = true;
+                    } else {
+                        if (userGenotype.includes(item.target)) {
+                            isMatch = true;
+                        }
+                    }
+
+                    if (isMatch) {
+                        parsedResults.push(`${item.rsid}=${userGenotype}`);
+                    }
+                }
+            });
+
+            reformatOutput();
+            statusDiv.textContent = `Success! Processed ${userGenetics.size} SNPs. Found ${parsedResults.length} matches.`;
+            statusDiv.className = "status-msg success";
+        }
+
+        function reformatOutput() {
+            if (parsedResults.length === 0) return;
+
+            const listString = parsedResults.join(", ");
+            const showPrompt = promptToggle.checked;
+
+            if (showPrompt) {
+                outputArea.value = PROMPT_TEXT + listString;
+            } else {
+                outputArea.value = listString;
+            }
+        }
+
+        function copyToClipboard() {
+            const copyText = document.getElementById("output");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); 
+            navigator.clipboard.writeText(copyText.value);
+            
+            const btn = document.querySelector('.copy-btn');
+            const originalText = btn.textContent;
+            btn.textContent = "Copied!";
+            setTimeout(() => btn.textContent = originalText, 2000);
+        }
+    </script>
+</body>
+</html>
