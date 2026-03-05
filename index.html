@@ -304,6 +304,7 @@
 { rsid: "rs1229984", target: "T" },
 { rsid: "rs2236624", target: "T" },
 { rsid: "rs5751876", target: "T" },
+{ rsid: "rs1800544", target: "C" },
 { rsid: "rs1801253", target: "G" },
 { rsid: "rs1042713", target: "A" },
 { rsid: "rs1042714", target: "G" },
@@ -365,6 +366,8 @@
 { rsid: "rs242941", target: "A" },
 { rsid: "rs242939", target: "C" },
 { rsid: "rs28364027", target: "G" },
+{ rsid: "rs10861688", target: "T" },
+{ rsid: "rs10838524", target: "G" },
 { rsid: "rs28941785", target: "T" },
 { rsid: "rs28941786", target: "G" },
 { rsid: "rs1048943", target: "C" },
@@ -422,6 +425,11 @@
 { rsid: "rs548294", target: "T" },
 { rsid: "rs1030757", target: "C" },
 { rsid: "rs5019028", target: "G" },
+{ rsid: "rs2832407", target: "C" },
+{ rsid: "rs363504", target: "C" },
+{ rsid: "rs363538", target: "C" },
+{ rsid: "rs363598", target: "C" },
+{ rsid: "rs360932", target: "A" },
 { rsid: "rs1805476", target: "T" },
 { rsid: "rs17864092", target: "C" },
 { rsid: "rs1002149", target: "T" },
@@ -440,6 +448,7 @@
 { rsid: "rs7775228", target: "C" },
 { rsid: "rs2187668", target: "T" },
 { rsid: "rs7454108", target: "C" },
+{ rsid: "rs1061235", target: "T" },
 { rsid: "rs1050891", target: "A" },
 { rsid: "rs2071048", target: "T" },
 { rsid: "rs11558538", target: "T" },
@@ -452,6 +461,7 @@
 { rsid: "rs6313", target: "A" },
 { rsid: "rs6314", target: "A" },
 { rsid: "rs731779", target: "C" },
+{ rsid: "rs7997012", target: "G" },
 { rsid: "rs79874540", target: "T" },
 { rsid: "rs3813929", target: "T" },
 { rsid: "rs1062613", target: "T" },
@@ -491,6 +501,8 @@
 { rsid: "rs4307059", target: "T" },
 { rsid: "rs1835740", target: "T" },
 { rsid: "rs2236225", target: "A" },
+{ rsid: "rs1076991", target: "T" },
+{ rsid: "rs1950902", target: "G" },
 { rsid: "rs11754661", target: "A" },
 { rsid: "rs1801131", target: "G" },
 { rsid: "rs1801133", target: "A" },
@@ -511,8 +523,11 @@
 { rsid: "rs3918226", target: "T" },
 { rsid: "rs891512", target: "A" },
 { rsid: "rs9932581", target: "T" },
+{ rsid: "rs11123857", target: "G" },
+{ rsid: "rs3768984", target: "C" },
 { rsid: "rs7171755", target: "A" },
 { rsid: "rs1800566", target: "A" },
+{ rsid: "rs2314339", target: "T" },
 { rsid: "rs5522", target: "C" },
 { rsid: "rs2506142", target: "G" },
 { rsid: "rs4868342", target: "C" },
@@ -534,6 +549,7 @@
 { rsid: "rs7946", target: "T" },
 { rsid: "rs2518023", target: "G" },
 { rsid: "rs2253820", target: "C" },
+{ rsid: "rs934945", target: "T" },
 { rsid: "rs228697", target: "G" },
 { rsid: "rs150812083", target: "G" },
 { rsid: "rs139315125", target: "G" },
@@ -570,10 +586,14 @@
 { rsid: "rs27072", target: "T" },
 { rsid: "rs140701", target: "T" },
 { rsid: "rs4795541", target: "X" },
+{ rsid: "rs25532", target: "T" },
+{ rsid: "rs25531", target: "X" },
 { rsid: "rs3746544", target: "T" },
 { rsid: "rs1041740", target: "T" },
 { rsid: "rs4880", target: "A" },
 { rsid: "rs5746136", target: "T" },
+{ rsid: "rs705702", target: "G" },
+{ rsid: "rs121908007", target: "A" },
 { rsid: "rs34324219", target: "A" },
 { rsid: "rs1801198", target: "G" },
 { rsid: "rs526934", target: "G" },
@@ -609,11 +629,11 @@
 { rsid: "rs121908866", target: "A" },
 { rsid: "rs1902023", target: "A" },
 { rsid: "rs1544410", target: "T" },
-{ rsid: "rs7975232", target: "C" },
+{ rsid: "rs7975232", target: "C" }
 ];
 
         // --- PLACEHOLDER PROMPT TEXT ---
-        const PROMPT_TEXT = "Please act as an expert in nutrigenomics, genetic analysis, functional medicine, and mental health. I have filtered my raw DNA file to find specific variants of interest which I will attach to the end of this prompt. Please consider the effects that each of these SNPs have on the brain and body, with an emphasis on neurochemical effects and mental health implications. Once you have considered each SNP individually, please consider the mechanisms and pathways involved in order to understand how all of these SNPs interact and what the cumulative effect is. Where complex chemical pathways have parts that are upregulated and parts that are downregulated, try to understand exactly where the bottlenecks occur and what the consequences might be. Topics you may want to consider are methylation, transsulfuration, COMT, serotonin, dopamine, norepinephrine, cortisol, histamine, estrogen, BDNF, oxytocin, ammonia, oxidation, inflammation, toxic metabolites, detox, etc. You are not limited to these topic areas though, please expand your analysis as wide as needed to address the genetic information given. If you are capable of retrieving information from the internet, you may need to do so to understand the effects of each SNP. The SNPs are:\n";
+        const PROMPT_TEXT = "Please act as an expert in nutrigenomics, genetic analysis, functional medicine, and mental health. I have filtered my raw DNA file to find specific variants of interest which I will attach to the end of this prompt. Please consider the effects that each of these SNPs have on the brain and body, with an emphasis on neurochemical effects and mental health implications. Once you have considered each SNP individually, please consider the mechanisms and pathways involved in order to understand how all of these SNPs interact and what the cumulative effect is. Where complex chemical pathways have parts that are upregulated and parts that are downregulated, try to understand exactly where the bottlenecks occur and what the consequences might be. Topics you may want to consider are methylation, transsulfuration, COMT, MAO, serotonin, dopamine, norepinephrine, cortisol, GABA, histamine, estrogen, BDNF, oxytocin, oxidation, inflammation, toxic metabolites, detox, nitric oxide, vitamins, minerals, etc. You are not limited to these topic areas though, please expand your analysis as wide as needed to address the genetic information given. If you are capable of retrieving information from the internet, you may need to do so to understand the effects of each SNP. The SNPs are:\n";
 
         // --- DOM ELEMENTS ---
         const fileInput = document.getElementById('fileInput');
@@ -859,4 +879,5 @@
 </body>
 
 </html>
+
 
