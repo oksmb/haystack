@@ -231,7 +231,7 @@
             <span class="upload-icon">📂</span>
             <span class="upload-text">drag & drop files here or click below</span>
             
-            <input type="file" id="fileInput" accept=".txt, .zip, .csv" multiple>
+            <input type="file" id="fileInput" accept=".txt, .zip, .csv, .vcf, .gz" multiple>
             <button id="resetBtn" class="reset-btn" onclick="resetData()">Reset / Clear Data</button>
             
             <div id="fileListDisplay" class="file-list"></div>
@@ -294,382 +294,765 @@
     <script>
         // --- CONFIGURATION: EDIT THIS LIST TO CHANGE TARGETS ---
 	// --- GENES MARKED AS TARGET X ARE ALWAYS RETURNED (USEFUL WHEN A GENOTYPE ALWAYS HAS A MENTAL HEALTH IMPLICATION WHETHER IT IS MUTANT OR WILD TYPE) ---
+	// --- A { section: "..." } LINE STARTS A NEW SECTION: THE SNPS BELOW IT ARE GROUPED UNDER THAT HEADING IN THE OUTPUT ---
         const TARGET_SNPS = [
-{ rsid: "rs4242382", target: "A" },
-{ rsid: "rs11869731", target: "C" },
-{ rsid: "rs11969731", target: "C" },
-{ rsid: "rs10875995", target: "C" },
-{ rsid: "rs685012", target: "C" },
-{ rsid: "rs73598374", target: "T" },
-{ rsid: "rs1229984", target: "T" },
-{ rsid: "rs2236624", target: "T" },
-{ rsid: "rs5751876", target: "T" },
-{ rsid: "rs1800544", target: "C" },
-{ rsid: "rs1801253", target: "G" },
-{ rsid: "rs1042713", target: "A" },
-{ rsid: "rs1042714", target: "G" },
-{ rsid: "rs1800888", target: "T" },
-{ rsid: "rs4994", target: "G" },
-{ rsid: "rs2494732", target: "C" },
-{ rsid: "rs2228093", target: "T" },
-{ rsid: "rs671", target: "A" },
-{ rsid: "rs737280", target: "C" },
-{ rsid: "rs62621664", target: "T" },
-{ rsid: "rs2760118", target: "T" },
-{ rsid: "rs3765310", target: "T" },
-{ rsid: "rs13182402", target: "G" },
-{ rsid: "rs10994336", target: "T" },
-{ rsid: "rs1938526", target: "G" },
-{ rsid: "rs10761482", target: "T" },
-{ rsid: "rs1049742", target: "T" },
-{ rsid: "rs1049793", target: "G" },
-{ rsid: "rs429358", target: "C" },
-{ rsid: "rs7412", target: "C" },
-{ rsid: "rs2306074", target: "T" },
-{ rsid: "rs1106634", target: "A" },
-{ rsid: "rs1061472", target: "C" },
-{ rsid: "rs1801243", target: "C" },
-{ rsid: "rs1803274", target: "T" },
-{ rsid: "rs7501331", target: "T" },
-{ rsid: "rs12934922", target: "T" },
-{ rsid: "rs6265", target: "T" },
-{ rsid: "rs11030101", target: "T" },
-{ rsid: "rs7103411", target: "C" },
-{ rsid: "rs56164415", target: "A" },
-{ rsid: "rs3733890", target: "A" },
-{ rsid: "rs651852", target: "C" },
-{ rsid: "rs6131295", target: "G" },
-{ rsid: "rs3923809", target: "A" },
-{ rsid: "rs2284018", target: "C" },
-{ rsid: "rs1801725", target: "T" },
-{ rsid: "rs1001179", target: "T" },
-{ rsid: "rs769217", target: "T" },
-{ rsid: "rs121964962", target: "T" },
-{ rsid: "rs121964970", target: "T" },
-{ rsid: "rs234706", target: "A" },
-{ rsid: "rs28934891", target: "T" },
-{ rsid: "rs398123151", target: "A" },
-{ rsid: "rs4920037", target: "A" },
-{ rsid: "rs1044396", target: "A" },
-{ rsid: "rs1801260", target: "G" },
-{ rsid: "rs7914558", target: "G" },
-{ rsid: "rs1049353", target: "T" },
-{ rsid: "rs165599", target: "X" },
-{ rsid: "rs4633", target: "X" },
-{ rsid: "rs4680", target: "X" },
-{ rsid: "rs6267", target: "X" },
-{ rsid: "rs4693596", target: "C" },
-{ rsid: "rs6925344", target: "T" },
-{ rsid: "rs5277", target: "C" },
-{ rsid: "rs110402", target: "G" },
-{ rsid: "rs242924", target: "G" },
-{ rsid: "rs242941", target: "A" },
-{ rsid: "rs242939", target: "C" },
-{ rsid: "rs28364027", target: "G" },
-{ rsid: "rs10861688", target: "T" },
-{ rsid: "rs10838524", target: "G" },
-{ rsid: "rs28941785", target: "T" },
-{ rsid: "rs28941786", target: "G" },
-{ rsid: "rs1048943", target: "C" },
-{ rsid: "rs2606345", target: "A" },
-{ rsid: "rs1799814", target: "T" },
-{ rsid: "rs762551", target: "C" },
-{ rsid: "rs1800440", target: "C" },
-{ rsid: "rs3745274", target: "T" },
-{ rsid: "rs12248560", target: "T" },
-{ rsid: "rs4244285", target: "A" },
-{ rsid: "rs1057910", target: "C" },
-{ rsid: "rs1799853", target: "T" },
-{ rsid: "rs3892097", target: "T" },
-{ rsid: "rs10156191", target: "T" },
-{ rsid: "rs2052129", target: "T" },
-{ rsid: "rs1611115", target: "T" },
-{ rsid: "rs6592961", target: "A" },
-{ rsid: "rs2235544", target: "A" },
-{ rsid: "rs225014", target: "C" },
-{ rsid: "rs121908331", target: "C" },
-{ rsid: "rs4532", target: "C" },
-{ rsid: "rs5326", target: "T" },
-{ rsid: "rs686", target: "G" },
-{ rsid: "rs6277", target: "A" },
-{ rsid: "rs1076560", target: "A" },
-{ rsid: "rs12364283", target: "G" },
-{ rsid: "rs1800497", target: "A" },
-{ rsid: "rs1801028", target: "C" },
-{ rsid: "rs6280", target: "C" },
-{ rsid: "rs1800955", target: "C" },
-{ rsid: "rs916455", target: "C" },
-{ rsid: "rs2234693", target: "T" },
-{ rsid: "rs324420", target: "A" },
-{ rsid: "rs174546", target: "T" },
-{ rsid: "rs174550", target: "T" },
-{ rsid: "rs1535", target: "G" },
-{ rsid: "rs121909612", target: "A" },
-{ rsid: "rs1360780", target: "T" },
-{ rsid: "rs3800373", target: "C" },
-{ rsid: "rs61735836", target: "T" },
-{ rsid: "rs601338", target: "A" },
-{ rsid: "rs602662", target: "G" },
-{ rsid: "rs2279020", target: "G" },
-{ rsid: "rs279858", target: "C" },
-{ rsid: "rs279871", target: "T" },
-{ rsid: "rs211037", target: "T" },
-{ rsid: "rs3749034", target: "A" },
-{ rsid: "rs17026688", target: "T" },
-{ rsid: "rs4820599", target: "G" },
-{ rsid: "rs2638315", target: "G" },
-{ rsid: "rs5443", target: "T" },
-{ rsid: "rs1800668", target: "A" },
-{ rsid: "rs1050450", target: "A" },
-{ rsid: "rs713041", target: "T" },
-{ rsid: "rs548294", target: "T" },
-{ rsid: "rs1030757", target: "C" },
-{ rsid: "rs5019028", target: "G" },
-{ rsid: "rs2832407", target: "C" },
-{ rsid: "rs363504", target: "C" },
-{ rsid: "rs363538", target: "C" },
-{ rsid: "rs363598", target: "C" },
-{ rsid: "rs360932", target: "A" },
-{ rsid: "rs1805476", target: "T" },
-{ rsid: "rs17864092", target: "C" },
-{ rsid: "rs1002149", target: "T" },
-{ rsid: "rs3957357", target: "A" },
-{ rsid: "rs366631", target: "A" },
-{ rsid: "rs11509438", target: "A" },
-{ rsid: "rs4925", target: "A" },
-{ rsid: "rs156697", target: "A" },
-{ rsid: "rs1138272", target: "T" },
-{ rsid: "rs1695", target: "X" },
-{ rsid: "rs1800562", target: "A" },
-{ rsid: "rs1799945", target: "G" },
-{ rsid: "rs1800730", target: "T" },
-{ rsid: "rs4713586", target: "A" },
-{ rsid: "rs2395182", target: "T" },
-{ rsid: "rs7775228", target: "C" },
-{ rsid: "rs2187668", target: "T" },
-{ rsid: "rs7454108", target: "C" },
-{ rsid: "rs1061235", target: "T" },
-{ rsid: "rs1050891", target: "A" },
-{ rsid: "rs2071048", target: "T" },
-{ rsid: "rs11558538", target: "T" },
-{ rsid: "rs901865", target: "T" },
-{ rsid: "rs11662595", target: "G" },
-{ rsid: "rs2227956", target: "A" },
-{ rsid: "rs6295", target: "X" },
-{ rsid: "rs6296", target: "G" },
-{ rsid: "rs6311", target: "T" },
-{ rsid: "rs6313", target: "A" },
-{ rsid: "rs6314", target: "A" },
-{ rsid: "rs731779", target: "C" },
-{ rsid: "rs7997012", target: "G" },
-{ rsid: "rs79874540", target: "T" },
-{ rsid: "rs3813929", target: "T" },
-{ rsid: "rs1062613", target: "T" },
-{ rsid: "rs1176744", target: "C" },
-{ rsid: "rs7627615", target: "G" },
-{ rsid: "rs3808606", target: "A" },
-{ rsid: "rs7820268", target: "C" },
-{ rsid: "rs10109853", target: "T" },
-{ rsid: "rs9657182", target: "C" },
-{ rsid: "rs4503083", target: "A" },
-{ rsid: "rs1800871", target: "G" },
-{ rsid: "rs1295686", target: "T" },
-{ rsid: "rs17561", target: "A" },
-{ rsid: "rs1800587", target: "A" },
-{ rsid: "rs16944", target: "G" },
-{ rsid: "rs4848306", target: "G" },
-{ rsid: "rs1143643", target: "T" },
-{ rsid: "rs1800795", target: "C" },
-{ rsid: "rs1800796", target: "G" },
-{ rsid: "rs1800797", target: "A" },
-{ rsid: "rs4129267", target: "C" },
-{ rsid: "rs4073", target: "A" },
-{ rsid: "rs2430561", target: "A" },
-{ rsid: "rs1053230", target: "C" },
-{ rsid: "rs4714329", target: "A" },
-{ rsid: "rs34637584", target: "A" },
-{ rsid: "rs34778348", target: "A" },
-{ rsid: "rs1137070", target: "X" },
-{ rsid: "rs6323", target: "X" },
-{ rsid: "rs979605", target: "X" },
-{ rsid: "rs1799836", target: "X" },
-{ rsid: "rs2311013", target: "X" },
-{ rsid: "rs5905512", target: "X" },
-{ rsid: "rs3027452", target: "X" },
-{ rsid: "rs72558181", target: "T" },
-{ rsid: "rs2243828", target: "G" },
-{ rsid: "rs4307059", target: "T" },
-{ rsid: "rs1835740", target: "T" },
-{ rsid: "rs2236225", target: "A" },
-{ rsid: "rs1076991", target: "T" },
-{ rsid: "rs1950902", target: "G" },
-{ rsid: "rs11754661", target: "A" },
-{ rsid: "rs1801131", target: "G" },
-{ rsid: "rs1801133", target: "A" },
-{ rsid: "rs10830963", target: "G" },
-{ rsid: "rs1805087", target: "G" },
-{ rsid: "rs1532268", target: "T" },
-{ rsid: "rs1801394", target: "G" },
-{ rsid: "rs4986782", target: "A" },
-{ rsid: "rs15561", target: "A" },
-{ rsid: "rs1801279", target: "A" },
-{ rsid: "rs4654748", target: "C" },
-{ rsid: "rs1064395", target: "A" },
-{ rsid: "rs6721961", target: "A" },
-{ rsid: "rs35829419", target: "A" },
-{ rsid: "rs694539", target: "T" },
-{ rsid: "rs1800779", target: "G" },
-{ rsid: "rs2070744", target: "C" },
-{ rsid: "rs3918226", target: "T" },
-{ rsid: "rs891512", target: "A" },
-{ rsid: "rs9932581", target: "T" },
-{ rsid: "rs11123857", target: "G" },
-{ rsid: "rs3768984", target: "C" },
-{ rsid: "rs7171755", target: "A" },
-{ rsid: "rs1800566", target: "A" },
-{ rsid: "rs2314339", target: "T" },
-{ rsid: "rs5522", target: "C" },
-{ rsid: "rs2506142", target: "G" },
-{ rsid: "rs4868342", target: "C" },
-{ rsid: "rs2367563", target: "A" },
-{ rsid: "rs1079610", target: "C" },
-{ rsid: "rs2675703", target: "T" },
-{ rsid: "rs1042114", target: "G" },
-{ rsid: "rs569356", target: "G" },
-{ rsid: "rs702764", target: "C" },
-{ rsid: "rs1799971", target: "G" },
-{ rsid: "rs10485057", target: "G" },
-{ rsid: "rs2281617", target: "T" },
-{ rsid: "rs510769", target: "T" },
-{ rsid: "rs53576", target: "A" },
-{ rsid: "rs1042778", target: "T" },
-{ rsid: "rs2268491", target: "T" },
-{ rsid: "rs237885", target: "T" },
-{ rsid: "rs237887", target: "G" },
-{ rsid: "rs7946", target: "T" },
-{ rsid: "rs2518023", target: "G" },
-{ rsid: "rs2253820", target: "C" },
-{ rsid: "rs934945", target: "T" },
-{ rsid: "rs228697", target: "G" },
-{ rsid: "rs150812083", target: "G" },
-{ rsid: "rs139315125", target: "G" },
-{ rsid: "rs662", target: "X" },
-{ rsid: "rs854560", target: "T" },
-{ rsid: "rs7493", target: "C" },
-{ rsid: "rs1310182", target: "G" },
-{ rsid: "rs7856850", target: "A" },
-{ rsid: "rs60249166", target: "C" },
-{ rsid: "rs12632942", target: "G" },
-{ rsid: "rs6746030", target: "A" },
-{ rsid: "rs4369876", target: "A" },
-{ rsid: "rs74449889", target: "G" },
-{ rsid: "rs8074026", target: "T" },
-{ rsid: "rs3184504", target: "T" },
-{ rsid: "rs1390938", target: "A" },
-{ rsid: "rs363276", target: "T" },
-{ rsid: "rs363387", target: "T" },
-{ rsid: "rs363227", target: "T" },
-{ rsid: "rs1051266", target: "T" },
-{ rsid: "rs301430", target: "C" },
-{ rsid: "rs2228622", target: "A" },
-{ rsid: "rs1994090", target: "G" },
-{ rsid: "rs2275707", target: "C" },
-{ rsid: "rs13266634", target: "C" },
-{ rsid: "rs10981694", target: "G" },
-{ rsid: "rs2234632", target: "T" },
-{ rsid: "rs13107325", target: "T" },
-{ rsid: "rs2242446", target: "C" },
-{ rsid: "rs5569", target: "A" },
-{ rsid: "rs7194256", target: "T" },
-{ rsid: "rs36021", target: "T" },
-{ rsid: "rs6347", target: "C" },
-{ rsid: "rs27072", target: "T" },
-{ rsid: "rs140701", target: "T" },
-{ rsid: "rs4795541", target: "X" },
-{ rsid: "rs25532", target: "T" },
-{ rsid: "rs25531", target: "X" },
-{ rsid: "rs3746544", target: "T" },
-{ rsid: "rs1041740", target: "T" },
-{ rsid: "rs4880", target: "A" },
-{ rsid: "rs5746136", target: "T" },
-{ rsid: "rs705702", target: "G" },
-{ rsid: "rs121908007", target: "A" },
-{ rsid: "rs34324219", target: "A" },
-{ rsid: "rs1801198", target: "G" },
-{ rsid: "rs526934", target: "G" },
-{ rsid: "rs9606756", target: "G" },
-{ rsid: "rs10770141", target: "A" },
-{ rsid: "rs2070762", target: "G" },
-{ rsid: "rs10759931", target: "G" },
-{ rsid: "rs1800629", target: "A" },
-{ rsid: "rs361525", target: "A" },
-{ rsid: "rs1800750", target: "A" },
-{ rsid: "rs3093664", target: "G" },
-{ rsid: "rs3093662", target: "G" },
-{ rsid: "rs1799964", target: "C" },
-{ rsid: "rs1799724", target: "T" },
-{ rsid: "rs1800693", target: "C" },
-{ rsid: "rs767455", target: "C" },
-{ rsid: "rs1061622", target: "G" },
-{ rsid: "rs2075650", target: "G" },
-{ rsid: "rs1799913", target: "T" },
-{ rsid: "rs4570625", target: "T" },
-{ rsid: "rs4290270", target: "T" },
-{ rsid: "rs11178997", target: "A" },
-{ rsid: "rs3750425", target: "T" },
-{ rsid: "rs2274924", target: "C" },
-{ rsid: "rs121912625", target: "A" },
-{ rsid: "rs10166942", target: "T" },
-{ rsid: "rs8065080", target: "C" },
-{ rsid: "rs222741", target: "G" },
-{ rsid: "rs222747", target: "C" },
-{ rsid: "rs161364", target: "T" },
-{ rsid: "rs224534", target: "A" },
-{ rsid: "rs1991517", target: "G" },
-{ rsid: "rs121908866", target: "A" },
-{ rsid: "rs1902023", target: "A" },
-{ rsid: "rs1544410", target: "T" },
-{ rsid: "rs7975232", target: "C" },
-{ rsid: "rs1006737", target: "A" },
-{ rsid: "rs1344706", target: "A" },
-{ rsid: "rs1799983", target: "T" },
-{ rsid: "rs2282679", target: "C" },
-{ rsid: "rs10741657", target: "G" },
-{ rsid: "rs855791", target: "A" },
-{ rsid: "rs1205", target: "C" },
-{ rsid: "rs2228145", target: "C" },
-{ rsid: "rs8192678", target: "T" },
-{ rsid: "rs11136000", target: "C" },
-{ rsid: "rs3851179", target: "G" },
-{ rsid: "rs776746", target: "C" },
-{ rsid: "rs1045642", target: "A" },
-{ rsid: "rs1799930", target: "A" },
-{ rsid: "rs17070145", target: "T" },
-{ rsid: "rs1057868", target: "T" },
-{ rsid: "rs2023239", target: "C" },
-{ rsid: "rs1954787", target: "T" },
-{ rsid: "rs16969968", target: "A" },
-{ rsid: "rs4746", target: "G" },
-{ rsid: "rs2254298", target: "A" },
-{ rsid: "rs6198",    target: "G" },
-{ rsid: "rs9470080", target: "T" },
-{ rsid: "rs9296158", target: "A" },
-{ rsid: "rs1143634", target: "T" },
-{ rsid: "rs1800896", target: "X" },
-{ rsid: "rs1130864", target: "T" },
-{ rsid: "rs2228570", target: "X" },
-{ rsid: "rs4588",    target: "A" },
-{ rsid: "rs174537",  target: "T" },
-{ rsid: "rs2108622", target: "T" },
-{ rsid: "rs4986893", target: "A" },
-{ rsid: "rs2304672", target: "X" },
-{ rsid: "rs9939609", target: "A" },
-{ rsid: "rs7903146",  target: "T" },
-{ rsid: "rs17782313", target: "C" }
+// ============================================================================
+{ section: "1. METHYLATION, FOLATE, VITAMIN B12, CHOLINE & TRANSSULFURATION" },
+// ============================================================================
+{ rsid: "rs819147", gene: "AHCY", target: "C" },
+{ rsid: "rs819171", gene: "AHCY", target: "C" },
+{ rsid: "rs2276724", gene: "ALDH1L1", target: "C" },
+{ rsid: "rs3733890", gene: "BHMT", target: "A" },
+{ rsid: "rs567754", gene: "BHMT", target: "T" },
+{ rsid: "rs651852", gene: "BHMT", target: "X" },
+{ rsid: "rs558660", gene: "CBLIF", target: "A" },
+{ rsid: "rs234706", gene: "CBS", target: "A" },
+{ rsid: "rs1801181", gene: "CBS", target: "A" },
+{ rsid: "rs12676", gene: "CHDH", target: "A" },
+{ rsid: "rs41281112", gene: "CLYBL", target: "T" },
+{ rsid: "rs1021737", gene: "CTH", target: "T" },
+{ rsid: "rs482843", gene: "CTH", target: "G" },
+{ rsid: "rs1801222", gene: "CUBN", target: "A" },
+{ rsid: "rs1643659", gene: "DHFR", target: "G" },
+{ rsid: "rs1650697", gene: "DHFR", target: "A" },
+{ rsid: "rs2431332", gene: "DMGDH", target: "G" },
+{ rsid: "rs202676", gene: "FOLH1", target: "G" },
+{ rsid: "rs601338", gene: "FUT2", target: "A" },
+{ rsid: "rs602662", gene: "FUT2", target: "G" },
+{ rsid: "rs1288775", gene: "GATM", target: "T" },
+{ rsid: "rs10948059", gene: "GNMT", target: "T" },
+{ rsid: "rs7087728", gene: "MAT1A", target: "A" },
+{ rsid: "rs9473555", gene: "MMUT", target: "C" },
+{ rsid: "rs2236225", gene: "MTHFD1", target: "A" },
+{ rsid: "rs6922269", gene: "MTHFD1L", target: "A" },
+{ rsid: "rs1801131", gene: "MTHFR", target: "G" },
+{ rsid: "rs1801133", gene: "MTHFR", target: "A" },
+{ rsid: "rs2274976", gene: "MTHFR", target: "T" },
+{ rsid: "rs4846049", gene: "MTHFR", target: "T" },
+{ rsid: "rs6495446", gene: "MTHFS", target: "T" },
+{ rsid: "rs1805087", gene: "MTR", target: "G" },
+{ rsid: "rs2275565", gene: "MTR", target: "T" },
+{ rsid: "rs1532268", gene: "MTRR", target: "T" },
+{ rsid: "rs1801394", gene: "MTRR", target: "G" },
+{ rsid: "rs10380", gene: "MTRR", target: "T" },
+{ rsid: "rs162036", gene: "MTRR", target: "G" },
+{ rsid: "rs694539", gene: "NNMT", target: "A" },
+{ rsid: "rs7946", gene: "PEMT", target: "T" },
+{ rsid: "rs12325817", gene: "PEMT", target: "G" },
+{ rsid: "rs2073817", gene: "SARDH", target: "T" },
+{ rsid: "rs1979277", gene: "SHMT1", target: "A" },
+{ rsid: "rs1051266", gene: "SLC19A1", target: "C" },
+{ rsid: "rs7873937", gene: "SLC44A1", target: "C" },
+{ rsid: "rs3199966", gene: "SLC44A1", target: "G" },
+{ rsid: "rs2239907", gene: "SLC46A1", target: "C" },
+{ rsid: "rs773115", gene: "SUOX", target: "C" },
+{ rsid: "rs526934", gene: "TCN1", target: "G" },
+{ rsid: "rs34324219", gene: "TCN1", target: "A" },
+{ rsid: "rs1801198", gene: "TCN2", target: "G" },
+{ rsid: "rs9606756", gene: "TCN2", target: "G" },
+{ rsid: "rs699517", gene: "TYMS", target: "T" },
+
+// ============================================================================
+{ section: "2. CATECHOLAMINES, DOPAMINE, NOREPINEPHRINE & BH4 SYNTHESIS" },
+// ============================================================================
+{ rsid: "rs1800497", gene: "ANKK1", target: "A" },
+{ rsid: "rs1044396", gene: "CHRNA4", target: "A" },
+{ rsid: "rs4633", gene: "COMT", target: "X" },
+{ rsid: "rs4680", gene: "COMT", target: "X" },
+{ rsid: "rs4818", gene: "COMT", target: "X" },
+{ rsid: "rs6267", gene: "COMT", target: "T" },
+{ rsid: "rs6269", gene: "COMT", target: "X" },
+{ rsid: "rs165599", gene: "COMT", target: "X" },
+{ rsid: "rs737865", gene: "COMT", target: "X" },
+{ rsid: "rs6271", gene: "DBH", target: "T" },
+{ rsid: "rs1108580", gene: "DBH", target: "A" },
+{ rsid: "rs1611115", gene: "DBH", target: "T" },
+{ rsid: "rs2519152", gene: "DBH", target: "T" },
+{ rsid: "rs921451", gene: "DDC", target: "C" },
+{ rsid: "rs11575542", gene: "DDC", target: "T" },
+{ rsid: "rs4532", gene: "DRD1", target: "C" },
+{ rsid: "rs6277", gene: "DRD2", target: "A" },
+{ rsid: "rs1076560", gene: "DRD2", target: "A" },
+{ rsid: "rs1801028", gene: "DRD2", target: "C" },
+{ rsid: "rs2283265", gene: "DRD2", target: "A" },
+{ rsid: "rs12364283", gene: "DRD2", target: "G" },
+{ rsid: "rs6280", gene: "DRD3", target: "C" },
+{ rsid: "rs747302", gene: "DRD4", target: "C" },
+{ rsid: "rs1800955", gene: "DRD4", target: "C" },
+{ rsid: "rs3783641", gene: "GCH1", target: "A" },
+{ rsid: "rs8007267", gene: "GCH1", target: "T" },
+{ rsid: "rs10483639", gene: "GCH1", target: "C" },
+{ rsid: "rs4411417", gene: "GCH1", target: "C" },
+{ rsid: "rs6323", gene: "MAOA", target: "X" },
+{ rsid: "rs1137070", gene: "MAOA", target: "X" },
+{ rsid: "rs979605", gene: "MAOA", target: "X" },
+{ rsid: "rs1799836", gene: "MAOB", target: "X" },
+{ rsid: "rs834829", gene: "NR4A2", target: "G" },
+{ rsid: "rs876493", gene: "PNMT", target: "X" },
+{ rsid: "rs907094", gene: "PPP1R1B", target: "X" },
+{ rsid: "rs3819331", gene: "PTS", target: "T" },
+{ rsid: "rs1031326", gene: "QDPR", target: "C" },
+{ rsid: "rs1390938", gene: "SLC18A1", target: "X" },
+{ rsid: "rs363387", gene: "SLC18A2", target: "G" },
+{ rsid: "rs363276", gene: "SLC18A2", target: "T" },
+{ rsid: "rs3088442", gene: "SLC22A3", target: "A" },
+{ rsid: "rs5569", gene: "SLC6A2", target: "A" },
+{ rsid: "rs2242446", gene: "SLC6A2", target: "C" },
+{ rsid: "rs28386840", gene: "SLC6A2", target: "T" },
+{ rsid: "rs27072", gene: "SLC6A3", target: "C" },
+{ rsid: "rs40184", gene: "SLC6A3", target: "T" },
+{ rsid: "rs6347", gene: "SLC6A3", target: "C" },
+{ rsid: "rs1876487", gene: "SPR", target: "C" },
+{ rsid: "rs6356", gene: "TH", target: "A" },
+{ rsid: "rs10770141", gene: "TH", target: "A" },
+{ rsid: "rs2070762", gene: "TH", target: "G" },
+
+// ============================================================================
+{ section: "3. SEROTONIN, TRYPTOPHAN, GABA, GLUTAMATE & OTHER NEUROTRANSMITTERS" },
+// ============================================================================
+{ rsid: "rs1480544", gene: "AADAT", target: "A" },
+{ rsid: "rs1731017", gene: "ABAT", target: "G" },
+{ rsid: "rs2121337", gene: "ACMSD", target: "C" },
+{ rsid: "rs2760118", gene: "ALDH5A1", target: "T" },
+{ rsid: "rs4446909", gene: "ASMT", target: "A" },
+{ rsid: "rs1803274", gene: "BCHE", target: "T" },
+{ rsid: "rs3810950", gene: "CHAT", target: "A" },
+{ rsid: "rs8191992", gene: "CHRM2", target: "A" },
+{ rsid: "rs16969968", gene: "CHRNA5", target: "A" },
+{ rsid: "rs6494223", gene: "CHRNA7", target: "C" },
+{ rsid: "rs806380", gene: "CNR1", target: "A" },
+{ rsid: "rs1049353", gene: "CNR1", target: "X" },
+{ rsid: "rs2501432", gene: "CNR2", target: "T" },
+{ rsid: "rs2111902", gene: "DAO", target: "G" },
+{ rsid: "rs324420", gene: "FAAH", target: "A" },
+{ rsid: "rs2279020", gene: "GABRA1", target: "G" },
+{ rsid: "rs279858", gene: "GABRA2", target: "C" },
+{ rsid: "rs3219151", gene: "GABRA6", target: "T" },
+{ rsid: "rs187269", gene: "GABRB2", target: "G" },
+{ rsid: "rs211037", gene: "GABRG2", target: "T" },
+{ rsid: "rs2241165", gene: "GAD1", target: "G" },
+{ rsid: "rs3749034", gene: "GAD1", target: "G" },
+{ rsid: "rs3791878", gene: "GAD1", target: "G" },
+{ rsid: "rs2236418", gene: "GAD2", target: "G" },
+{ rsid: "rs548294", gene: "GRIA1", target: "A" },
+{ rsid: "rs2832407", gene: "GRIK1", target: "C" },
+{ rsid: "rs1954787", gene: "GRIK4", target: "T" },
+{ rsid: "rs1806201", gene: "GRIN2B", target: "A" },
+{ rsid: "rs7301328", gene: "GRIN2B", target: "C" },
+{ rsid: "rs6465084", gene: "GRM3", target: "G" },
+{ rsid: "rs6295", gene: "HTR1A", target: "X" },
+{ rsid: "rs1364043", gene: "HTR1A", target: "G" },
+{ rsid: "rs6296", gene: "HTR1B", target: "G" },
+{ rsid: "rs6795209", gene: "HTR1F", target: "A" },
+{ rsid: "rs6311", gene: "HTR2A", target: "T" },
+{ rsid: "rs6313", gene: "HTR2A", target: "A" },
+{ rsid: "rs6314", gene: "HTR2A", target: "A" },
+{ rsid: "rs7997012", gene: "HTR2A", target: "G" },
+{ rsid: "rs79874540", gene: "HTR2B", target: "A" },
+{ rsid: "rs3813929", gene: "HTR2C", target: "X" },
+{ rsid: "rs1414334", gene: "HTR2C", target: "C" },
+{ rsid: "rs1062613", gene: "HTR3A", target: "T" },
+{ rsid: "rs1176744", gene: "HTR3B", target: "C" },
+{ rsid: "rs7820268", gene: "IDO1", target: "T" },
+{ rsid: "rs9657182", gene: "IDO1", target: "C" },
+{ rsid: "rs10109853", gene: "IDO2", target: "T" },
+{ rsid: "rs1053230", gene: "KMO", target: "C" },
+{ rsid: "rs604300", gene: "MGLL", target: "A" },
+{ rsid: "rs324981", gene: "NPSR1", target: "T" },
+{ rsid: "rs16147", gene: "NPY", target: "C" },
+{ rsid: "rs16139", gene: "NPY", target: "C" },
+{ rsid: "rs1051660", gene: "OPRK1", target: "A" },
+{ rsid: "rs1799971", gene: "OPRM1", target: "G" },
+{ rsid: "rs53576", gene: "OXTR", target: "A" },
+{ rsid: "rs2254298", gene: "OXTR", target: "A" },
+{ rsid: "rs301430", gene: "SLC1A1", target: "C" },
+{ rsid: "rs4354668", gene: "SLC1A2", target: "G" },
+{ rsid: "rs1013940", gene: "SLC5A7", target: "G" },
+{ rsid: "rs25531", gene: "SLC6A4", target: "X" },
+{ rsid: "rs140701", gene: "SLC6A4", target: "T" },
+{ rsid: "rs25532", gene: "SLC6A4", target: "A" },
+{ rsid: "rs3755907", gene: "TDO2", target: "A" },
+{ rsid: "rs1799913", gene: "TPH1", target: "T" },
+{ rsid: "rs4570625", gene: "TPH2", target: "T" },
+{ rsid: "rs1386494", gene: "TPH2", target: "T" },
+{ rsid: "rs7305115", gene: "TPH2", target: "A" },
+
+// ============================================================================
+{ section: "4. POTS, AUTONOMIC TONE, ADRENERGIC SIGNALING, RAAS & VASCULAR ENDOTHELIUM" },
+// ============================================================================
+{ rsid: "rs4343", gene: "ACE", target: "X" },
+{ rsid: "rs2106809", gene: "ACE2", target: "G" },
+{ rsid: "rs6693567", gene: "ADAMTSL4", target: "C" },
+{ rsid: "rs4961", gene: "ADD1", target: "T" },
+{ rsid: "rs1048101", gene: "ADRA1A", target: "X" },
+{ rsid: "rs1800544", gene: "ADRA2A", target: "G" },
+{ rsid: "rs1801252", gene: "ADRB1", target: "X" },
+{ rsid: "rs1801253", gene: "ADRB1", target: "X" },
+{ rsid: "rs1042713", gene: "ADRB2", target: "X" },
+{ rsid: "rs1042714", gene: "ADRB2", target: "X" },
+{ rsid: "rs1800888", gene: "ADRB2", target: "T" },
+{ rsid: "rs699", gene: "AGT", target: "G" },
+{ rsid: "rs4762", gene: "AGT", target: "A" },
+{ rsid: "rs5186", gene: "AGTR1", target: "C" },
+{ rsid: "rs1042615", gene: "AVPR1A", target: "A" },
+{ rsid: "rs1799722", gene: "BDKRB2", target: "T" },
+{ rsid: "rs7165327", gene: "CCPG1", target: "G" },
+{ rsid: "rs1051730", gene: "CHRNA3", target: "A" },
+{ rsid: "rs12722", gene: "COL5A1", target: "T" },
+{ rsid: "rs1799998", gene: "CYP11B2", target: "X" },
+{ rsid: "rs5370", gene: "EDN1", target: "T" },
+{ rsid: "rs5335", gene: "EDNRA", target: "G" },
+{ rsid: "rs28455731", gene: "GJA1", target: "T" },
+{ rsid: "rs5443", gene: "GNB3", target: "T" },
+{ rsid: "rs4262", gene: "GNG11", target: "C" },
+{ rsid: "rs7164883", gene: "HCN4", target: "G" },
+{ rsid: "rs1805127", gene: "KCNE1", target: "C" },
+{ rsid: "rs6123471", gene: "KIAA1755", target: "T" },
+{ rsid: "rs365990", gene: "MYH6", target: "G" },
+{ rsid: "rs4149601", gene: "NEDD4L", target: "A" },
+{ rsid: "rs2682826", gene: "NOS1", target: "T" },
+{ rsid: "rs12143842", gene: "NOS1AP", target: "T" },
+{ rsid: "rs2297518", gene: "NOS2", target: "A" },
+{ rsid: "rs1799983", gene: "NOS3", target: "T" },
+{ rsid: "rs2070744", gene: "NOS3", target: "C" },
+{ rsid: "rs3918226", gene: "NOS3", target: "T" },
+{ rsid: "rs5063", gene: "NPPA", target: "T" },
+{ rsid: "rs5065", gene: "NPPA", target: "G" },
+{ rsid: "rs198389", gene: "NPPB", target: "G" },
+{ rsid: "rs2368564", gene: "REN", target: "T" },
+{ rsid: "rs4606", gene: "RGS2", target: "G" },
+{ rsid: "rs4899412", gene: "RGS6", target: "T" },
+{ rsid: "rs6795970", gene: "SCN10A", target: "A" },
+{ rsid: "rs2228576", gene: "SCNN1A", target: "X" },
+{ rsid: "rs7980799", gene: "SYT10", target: "A" },
+{ rsid: "rs6791480", gene: "TGFBR2", target: "T" },
+{ rsid: "rs2106261", gene: "ZFHX3", target: "T" },
+
+// ============================================================================
+{ section: "5. MIGRAINE SUSCEPTIBILITY, CGRP, NOCICEPTION & ION CHANNELS" },
+// ============================================================================
+{ rsid: "rs2856966", gene: "ADCYAP1", target: "G" },
+{ rsid: "rs685012", gene: "ASIC1", target: "C" },
+{ rsid: "rs10875995", gene: "ASIC1", target: "C" },
+{ rsid: "rs6478241", gene: "ASTN2", target: "A" },
+{ rsid: "rs10167914", gene: "ATP1A2", target: "G" },
+{ rsid: "rs34626694", gene: "CA10", target: "T" },
+{ rsid: "rs10405121", gene: "CACNA1A", target: "G" },
+{ rsid: "rs1006737", gene: "CACNA1C", target: "A" },
+{ rsid: "rs1003194", gene: "CALCA", target: "A" },
+{ rsid: "rs840562", gene: "CALCRL", target: "T" },
+{ rsid: "rs13208321", gene: "FHL5", target: "A" },
+{ rsid: "rs2653349", gene: "HCRTR2", target: "G" },
+{ rsid: "rs12598836", gene: "HMOX2", target: "G" },
+{ rsid: "rs11624776", gene: "ITPK1", target: "A" },
+{ rsid: "rs363314", gene: "KCNK18", target: "T" },
+{ rsid: "rs10456100", gene: "KCNK5", target: "T" },
+{ rsid: "rs734784", gene: "KCNS1", target: "C" },
+{ rsid: "rs11172113", gene: "LRP1", target: "T" },
+{ rsid: "rs1925950", gene: "MEF2D", target: "G" },
+{ rsid: "rs11031122", gene: "MPPED2", target: "C" },
+{ rsid: "rs4910165", gene: "MRVI1", target: "G" },
+{ rsid: "rs1835740", gene: "MTDH", target: "T" },
+{ rsid: "rs6330", gene: "NGF", target: "A" },
+{ rsid: "rs2506142", gene: "NRP1", target: "G" },
+{ rsid: "rs7958311", gene: "P2RX3", target: "A" },
+{ rsid: "rs9349379", gene: "PHACTR1", target: "A" },
+{ rsid: "rs2911463", gene: "PIEZO1", target: "T" },
+{ rsid: "rs2651899", gene: "PRDM16", target: "C" },
+{ rsid: "rs10218452", gene: "PRDM16", target: "G" },
+{ rsid: "rs3754701", gene: "RAMP1", target: "A" },
+{ rsid: "rs7684253", gene: "REST", target: "T" },
+{ rsid: "rs3812718", gene: "SCN1A", target: "X" },
+{ rsid: "rs6746030", gene: "SCN9A", target: "A" },
+{ rsid: "rs4379368", gene: "SUGCT", target: "T" },
+{ rsid: "rs920829", gene: "TRPA1", target: "T" },
+{ rsid: "rs11988795", gene: "TRPA1", target: "A" },
+{ rsid: "rs10166942", gene: "TRPM8", target: "T" },
+{ rsid: "rs8065080", gene: "TRPV1", target: "C" },
+{ rsid: "rs3742030", gene: "TRPV4", target: "T" },
+{ rsid: "rs2078371", gene: "TSPAN2", target: "C" },
+
+// ============================================================================
+{ section: "6. HISTAMINE, MAST CELL ACTIVATION (MCAS) & IMMUNE/INFLAMMATORY SIGNALING" },
+// ============================================================================
+{ rsid: "rs2115819", gene: "ALOX5", target: "C" },
+{ rsid: "rs1049742", gene: "AOC1", target: "T" },
+{ rsid: "rs1049793", gene: "AOC1", target: "G" },
+{ rsid: "rs2052129", gene: "AOC1", target: "T" },
+{ rsid: "rs10156191", gene: "AOC1", target: "T" },
+{ rsid: "rs9358913", gene: "BTN2A2", target: "G" },
+{ rsid: "rs1205", gene: "CRP", target: "C" },
+{ rsid: "rs1130864", gene: "CRP", target: "A" },
+{ rsid: "rs231775", gene: "CTLA4", target: "G" },
+{ rsid: "rs2251746", gene: "FCER1A", target: "T" },
+{ rsid: "rs1801274", gene: "FCGR2A", target: "X" },
+{ rsid: "rs7216389", gene: "GSDMB", target: "T" },
+{ rsid: "rs2073440", gene: "HDC", target: "G" },
+{ rsid: "rs1061235", gene: "HLA-A", target: "T" },
+{ rsid: "rs2187668", gene: "HLA-DQA1", target: "T" },
+{ rsid: "rs4713586", gene: "HLA-DQB1", target: "X" },
+{ rsid: "rs7454108", gene: "HLA-DQB1", target: "C" },
+{ rsid: "rs7775228", gene: "HLA-DQB1", target: "C" },
+{ rsid: "rs2395182", gene: "HLA-DRA", target: "T" },
+{ rsid: "rs11558538", gene: "HNMT", target: "T" },
+{ rsid: "rs1050891", gene: "HNMT", target: "G" },
+{ rsid: "rs901865", gene: "HRH1", target: "T" },
+{ rsid: "rs2067474", gene: "HRH2", target: "A" },
+{ rsid: "rs3787429", gene: "HRH3", target: "T" },
+{ rsid: "rs11665084", gene: "HRH4", target: "T" },
+{ rsid: "rs1990760", gene: "IFIH1", target: "T" },
+{ rsid: "rs2430561", gene: "IFNG", target: "T" },
+{ rsid: "rs1800871", gene: "IL10", target: "A" },
+{ rsid: "rs1800896", gene: "IL10", target: "X" },
+{ rsid: "rs20541", gene: "IL13", target: "A" },
+{ rsid: "rs187238", gene: "IL18", target: "G" },
+{ rsid: "rs16944", gene: "IL1B", target: "A" },
+{ rsid: "rs1420101", gene: "IL1RL1", target: "T" },
+{ rsid: "rs419598", gene: "IL1RN", target: "C" },
+{ rsid: "rs11209026", gene: "IL23R", target: "A" },
+{ rsid: "rs2104286", gene: "IL2RA", target: "C" },
+{ rsid: "rs1342326", gene: "IL33", target: "C" },
+{ rsid: "rs2243250", gene: "IL4", target: "T" },
+{ rsid: "rs1801275", gene: "IL4R", target: "G" },
+{ rsid: "rs1800795", gene: "IL6", target: "X" },
+{ rsid: "rs1800796", gene: "IL6", target: "C" },
+{ rsid: "rs2228145", gene: "IL6R", target: "C" },
+{ rsid: "rs3822214", gene: "KIT", target: "A" },
+{ rsid: "rs730012", gene: "LTC4S", target: "C" },
+{ rsid: "rs569108", gene: "MS4A2", target: "G" },
+{ rsid: "rs1799930", gene: "NAT2", target: "A" },
+{ rsid: "rs1801280", gene: "NAT2", target: "C" },
+{ rsid: "rs12150220", gene: "NLRP1", target: "T" },
+{ rsid: "rs35829419", gene: "NLRP3", target: "A" },
+{ rsid: "rs2230912", gene: "P2RX7", target: "G" },
+{ rsid: "rs3751143", gene: "P2RX7", target: "C" },
+{ rsid: "rs1051931", gene: "PLA2G7", target: "A" },
+{ rsid: "rs5275", gene: "PTGS2", target: "G" },
+{ rsid: "rs20417", gene: "PTGS2", target: "G" },
+{ rsid: "rs2476601", gene: "PTPN22", target: "A" },
+{ rsid: "rs3184504", gene: "SH2B3", target: "T" },
+{ rsid: "rs7574865", gene: "STAT4", target: "T" },
+{ rsid: "rs1800469", gene: "TGFB1", target: "A" },
+{ rsid: "rs5743708", gene: "TLR2", target: "A" },
+{ rsid: "rs4986790", gene: "TLR4", target: "G" },
+{ rsid: "rs1800629", gene: "TNF", target: "A" },
+{ rsid: "rs2230926", gene: "TNFAIP3", target: "G" },
+{ rsid: "rs1837253", gene: "TSLP", target: "T" },
+
+// ============================================================================
+{ section: "7. MITOCHONDRIAL ENERGY, OXIDATIVE STRESS & REDOX DEFENSE" },
+// ============================================================================
+{ rsid: "rs17602729", gene: "AMPD1", target: "A" },
+{ rsid: "rs1001179", gene: "CAT", target: "T" },
+{ rsid: "rs1800561", gene: "CD38", target: "T" },
+{ rsid: "rs6449182", gene: "CD38", target: "G" },
+{ rsid: "rs4693075", gene: "COQ2", target: "G" },
+{ rsid: "rs1799821", gene: "CPT2", target: "A" },
+{ rsid: "rs4673", gene: "CYBA", target: "A" },
+{ rsid: "rs8087942", gene: "FECH", target: "A" },
+{ rsid: "rs17883901", gene: "GCLC", target: "A" },
+{ rsid: "rs41303970", gene: "GCLM", target: "A" },
+{ rsid: "rs1050450", gene: "GPX1", target: "A" },
+{ rsid: "rs713041", gene: "GPX4", target: "T" },
+{ rsid: "rs1002149", gene: "GSR", target: "T" },
+{ rsid: "rs1801310", gene: "GSS", target: "A" },
+{ rsid: "rs1695", gene: "GSTP1", target: "X" },
+{ rsid: "rs1138272", gene: "GSTP1", target: "T" },
+{ rsid: "rs9770242", gene: "NAMPT", target: "C" },
+{ rsid: "rs12974991", gene: "NDUFA11", target: "A" },
+{ rsid: "rs6721961", gene: "NFE2L2", target: "T" },
+{ rsid: "rs1800566", gene: "NQO1", target: "A" },
+{ rsid: "rs2402970", gene: "NRF1", target: "C" },
+{ rsid: "rs1136410", gene: "PARP1", target: "G" },
+{ rsid: "rs662", gene: "PON1", target: "X" },
+{ rsid: "rs4253778", gene: "PPARA", target: "C" },
+{ rsid: "rs8192678", gene: "PPARGC1A", target: "T" },
+{ rsid: "rs34713741", gene: "SELENOS", target: "T" },
+{ rsid: "rs3758391", gene: "SIRT1", target: "C" },
+{ rsid: "rs11246020", gene: "SIRT3", target: "T" },
+{ rsid: "rs1050152", gene: "SLC22A4", target: "T" },
+{ rsid: "rs2631367", gene: "SLC22A5", target: "G" },
+{ rsid: "rs2070424", gene: "SOD1", target: "G" },
+{ rsid: "rs4880", gene: "SOD2", target: "A" },
+{ rsid: "rs1799895", gene: "SOD3", target: "G" },
+{ rsid: "rs1937", gene: "TFAM", target: "C" },
+{ rsid: "rs2075650", gene: "TOMM40", target: "G" },
+{ rsid: "rs5748469", gene: "TXNRD2", target: "A" },
+{ rsid: "rs659366", gene: "UCP2", target: "X" },
+{ rsid: "rs1800849", gene: "UCP3", target: "A" },
+
+// ============================================================================
+{ section: "8. CIRCADIAN RHYTHM, SLEEP ARCHITECTURE, ADENOSINE & RESTLESS LEGS" },
+// ============================================================================
+{ rsid: "rs73598374", gene: "ADA", target: "T" },
+{ rsid: "rs3766553", gene: "ADORA1", target: "G" },
+{ rsid: "rs5751876", gene: "ADORA2A", target: "T" },
+{ rsid: "rs2298383", gene: "ADORA2A", target: "T" },
+{ rsid: "rs4410790", gene: "AHR", target: "T" },
+{ rsid: "rs2278749", gene: "ARNTL", target: "T" },
+{ rsid: "rs3923809", gene: "BTBD9", target: "A" },
+{ rsid: "rs1801260", gene: "CLOCK", target: "G" },
+{ rsid: "rs4580704", gene: "CLOCK", target: "G" },
+{ rsid: "rs184039278", gene: "CRY1", target: "G" },
+{ rsid: "rs10838524", gene: "CRY2", target: "A" },
+{ rsid: "rs135745", gene: "CSNK1E", target: "C" },
+{ rsid: "rs2472297", gene: "CYP1A2", target: "T" },
+{ rsid: "rs2271933", gene: "HCRTR1", target: "A" },
+{ rsid: "rs12593813", gene: "MAP2K5", target: "G" },
+{ rsid: "rs113851554", gene: "MEIS1", target: "T" },
+{ rsid: "rs2300478", gene: "MEIS1", target: "G" },
+{ rsid: "rs2119882", gene: "MTNR1A", target: "C" },
+{ rsid: "rs10830963", gene: "MTNR1B", target: "G" },
+{ rsid: "rs2305160", gene: "NPAS2", target: "A" },
+{ rsid: "rs11541353", gene: "NPAS2", target: "T" },
+{ rsid: "rs2675703", gene: "OPN4", target: "T" },
+{ rsid: "rs2735611", gene: "PER1", target: "A" },
+{ rsid: "rs3027172", gene: "PER1", target: "C" },
+{ rsid: "rs934945", gene: "PER2", target: "T" },
+{ rsid: "rs2304672", gene: "PER2", target: "G" },
+{ rsid: "rs228697", gene: "PER3", target: "G" },
+{ rsid: "rs139315125", gene: "PER3", target: "G" },
+{ rsid: "rs150812083", gene: "PER3", target: "G" },
+{ rsid: "rs1975197", gene: "PTPRD", target: "A" },
+{ rsid: "rs11545787", gene: "RASD1", target: "A" },
+{ rsid: "rs774045", gene: "TIMELESS", target: "A" },
+{ rsid: "rs3104767", gene: "TOX3", target: "G" },
+
+// ============================================================================
+{ section: "9. HPA AXIS, STRESS RESPONSE, THYROID & SEX/NEUROSTEROID HORMONES" },
+// ============================================================================
+{ rsid: "rs2267735", gene: "ADCYAP1R1", target: "C" },
+{ rsid: "rs10473984", gene: "CRHBP", target: "T" },
+{ rsid: "rs110402", gene: "CRHR1", target: "G" },
+{ rsid: "rs242924", gene: "CRHR1", target: "G" },
+{ rsid: "rs7209436", gene: "CRHR1", target: "C" },
+{ rsid: "rs2267715", gene: "CRHR2", target: "A" },
+{ rsid: "rs743572", gene: "CYP17A1", target: "G" },
+{ rsid: "rs10046", gene: "CYP19A1", target: "A" },
+{ rsid: "rs2414096", gene: "CYP19A1", target: "A" },
+{ rsid: "rs2235544", gene: "DIO1", target: "A" },
+{ rsid: "rs225014", gene: "DIO2", target: "C" },
+{ rsid: "rs945006", gene: "DIO3", target: "G" },
+{ rsid: "rs2234693", gene: "ESR1", target: "X" },
+{ rsid: "rs6557168", gene: "ESR1", target: "C" },
+{ rsid: "rs9340799", gene: "ESR1", target: "X" },
+{ rsid: "rs1256049", gene: "ESR2", target: "T" },
+{ rsid: "rs4986938", gene: "ESR2", target: "T" },
+{ rsid: "rs1360780", gene: "FKBP5", target: "T" },
+{ rsid: "rs3800373", gene: "FKBP5", target: "C" },
+{ rsid: "rs9296158", gene: "FKBP5", target: "A" },
+{ rsid: "rs9470080", gene: "FKBP5", target: "T" },
+{ rsid: "rs965513", gene: "FOXE1", target: "G" },
+{ rsid: "rs846910", gene: "HSD11B1", target: "A" },
+{ rsid: "rs12086634", gene: "HSD11B1", target: "G" },
+{ rsid: "rs5479", gene: "HSD11B2", target: "A" },
+{ rsid: "rs7799039", gene: "LEP", target: "A" },
+{ rsid: "rs1137101", gene: "LEPR", target: "G" },
+{ rsid: "rs6190", gene: "NR3C1", target: "T" },
+{ rsid: "rs6198", gene: "NR3C1", target: "C" },
+{ rsid: "rs41423247", gene: "NR3C1", target: "C" },
+{ rsid: "rs56149945", gene: "NR3C1", target: "C" },
+{ rsid: "rs5522", gene: "NR3C2", target: "C" },
+{ rsid: "rs2070951", gene: "NR3C2", target: "X" },
+{ rsid: "rs4704397", gene: "PDE8B", target: "A" },
+{ rsid: "rs1042838", gene: "PGR", target: "A" },
+{ rsid: "rs8042149", gene: "RORA", target: "G" },
+{ rsid: "rs12589136", gene: "SERPINA6", target: "T" },
+{ rsid: "rs1799941", gene: "SHBG", target: "A" },
+{ rsid: "rs10770704", gene: "SLCO1C1", target: "T" },
+{ rsid: "rs166050", gene: "SRD5A1", target: "C" },
+{ rsid: "rs523349", gene: "SRD5A2", target: "C" },
+{ rsid: "rs1991517", gene: "TSHR", target: "G" },
+{ rsid: "rs6971", gene: "TSPO", target: "A" },
+
+// ============================================================================
+{ section: "10. NEUROPLASTICITY, COGNITIVE RESILIENCE & PSYCHIATRIC GWAS LOCI" },
+// ============================================================================
+{ rsid: "rs3764650", gene: "ABCA7", target: "G" },
+{ rsid: "rs6551665", gene: "ADGRL3", target: "G" },
+{ rsid: "rs2494732", gene: "AKT1", target: "C" },
+{ rsid: "rs10994336", gene: "ANK3", target: "T" },
+{ rsid: "rs7412", gene: "APOE", target: "X" },
+{ rsid: "rs429358", gene: "APOE", target: "X" },
+{ rsid: "rs6265", gene: "BDNF", target: "T" },
+{ rsid: "rs744373", gene: "BIN1", target: "G" },
+{ rsid: "rs11013860", gene: "CACNB2", target: "A" },
+{ rsid: "rs11136000", gene: "CLU", target: "C" },
+{ rsid: "rs6656401", gene: "CR1", target: "A" },
+{ rsid: "rs2253206", gene: "CREB1", target: "A" },
+{ rsid: "rs10503253", gene: "CSMD1", target: "A" },
+{ rsid: "rs821616", gene: "DISC1", target: "A" },
+{ rsid: "rs7598440", gene: "ERBB4", target: "A" },
+{ rsid: "rs9367106", gene: "FOXP4", target: "C" },
+{ rsid: "rs76763715", gene: "GBA1", target: "C" },
+{ rsid: "rs334558", gene: "GSK3B", target: "G" },
+{ rsid: "rs7713917", gene: "HOMER1", target: "A" },
+{ rsid: "rs9536314", gene: "KL", target: "G" },
+{ rsid: "rs2179744", gene: "L3MBTL2", target: "A" },
+{ rsid: "rs35936514", gene: "LHPP", target: "T" },
+{ rsid: "rs4904738", gene: "LRFN5", target: "C" },
+{ rsid: "rs12023347", gene: "LRRIQ3", target: "T" },
+{ rsid: "rs34637584", gene: "LRRK2", target: "A" },
+{ rsid: "rs34778348", gene: "LRRK2", target: "A" },
+{ rsid: "rs56226325", gene: "MAD1L1", target: "C" },
+{ rsid: "rs1052553", gene: "MAPT", target: "G" },
+{ rsid: "rs1064395", gene: "NCAN", target: "A" },
+{ rsid: "rs1432639", gene: "NEGR1", target: "A" },
+{ rsid: "rs1812835", gene: "NEO1", target: "A" },
+{ rsid: "rs6994992", gene: "NRG1", target: "T" },
+{ rsid: "rs2289656", gene: "NTRK2", target: "T" },
+{ rsid: "rs12552", gene: "OLFM4", target: "A" },
+{ rsid: "rs2522833", gene: "PCLO", target: "C" },
+{ rsid: "rs3851179", gene: "PICALM", target: "C" },
+{ rsid: "rs12071663", gene: "RABGAP1L", target: "T" },
+{ rsid: "rs8063603", gene: "RBFOX1", target: "G" },
+{ rsid: "rs7341475", gene: "RELN", target: "A" },
+{ rsid: "rs4603973", gene: "SATB1", target: "G" },
+{ rsid: "rs3746544", gene: "SNAP25", target: "X" },
+{ rsid: "rs356219", gene: "SNCA", target: "G" },
+{ rsid: "rs11218343", gene: "SORL1", target: "C" },
+{ rsid: "rs9371601", gene: "SYNE1", target: "T" },
+{ rsid: "rs9960767", gene: "TCF4", target: "C" },
+{ rsid: "rs10514299", gene: "TMEM161B", target: "T" },
+{ rsid: "rs9834970", gene: "TRANK1", target: "C" },
+{ rsid: "rs75932628", gene: "TREM2", target: "T" },
+{ rsid: "rs17070145", gene: "WWC1", target: "T" },
+{ rsid: "rs1344706", gene: "ZNF804A", target: "A" },
+{ rsid: "rs12465214", gene: "ZNF804A", target: "C" },
+
+// ============================================================================
+{ section: "11. VITAMINS, LIPIDS, METABOLIC & NUTRIGENOMIC PATHWAYS" },
+// ============================================================================
+{ rsid: "rs4654748", gene: "ALPL", target: "C" },
+{ rsid: "rs662799", gene: "APOA5", target: "G" },
+{ rsid: "rs7501331", gene: "BCO1", target: "T" },
+{ rsid: "rs12934922", gene: "BCO1", target: "T" },
+{ rsid: "rs13078881", gene: "BTD", target: "C" },
+{ rsid: "rs6013897", gene: "CYP24A1", target: "A" },
+{ rsid: "rs10877012", gene: "CYP27B1", target: "T" },
+{ rsid: "rs10741657", gene: "CYP2R1", target: "G" },
+{ rsid: "rs2108622", gene: "CYP4F2", target: "T" },
+{ rsid: "rs12785878", gene: "DHCR7", target: "G" },
+{ rsid: "rs953413", gene: "ELOVL2", target: "A" },
+{ rsid: "rs174537", gene: "FADS1", target: "T" },
+{ rsid: "rs174546", gene: "FADS1", target: "T" },
+{ rsid: "rs1535", gene: "FADS2", target: "G" },
+{ rsid: "rs2266780", gene: "FMO3", target: "G" },
+{ rsid: "rs2266782", gene: "FMO3", target: "A" },
+{ rsid: "rs9939609", gene: "FTO", target: "A" },
+{ rsid: "rs1050828", gene: "G6PD", target: "T" },
+{ rsid: "rs4588", gene: "GC", target: "T" },
+{ rsid: "rs7041", gene: "GC", target: "X" },
+{ rsid: "rs2282679", gene: "GC", target: "G" },
+{ rsid: "rs1260326", gene: "GCKR", target: "T" },
+{ rsid: "rs11676382", gene: "GGCX", target: "G" },
+{ rsid: "rs4988235", gene: "LCT", target: "G" },
+{ rsid: "rs17782313", gene: "MC4R", target: "C" },
+{ rsid: "rs2010795", gene: "PDXK", target: "G" },
+{ rsid: "rs738409", gene: "PNPLA3", target: "G" },
+{ rsid: "rs17679445", gene: "PNPO", target: "A" },
+{ rsid: "rs1801282", gene: "PPARG", target: "G" },
+{ rsid: "rs1049434", gene: "SLC16A1", target: "A" },
+{ rsid: "rs13011437", gene: "SLC19A3", target: "A" },
+{ rsid: "rs33972313", gene: "SLC23A1", target: "T" },
+{ rsid: "rs1279683", gene: "SLC23A2", target: "G" },
+{ rsid: "rs841853", gene: "SLC2A1", target: "A" },
+{ rsid: "rs3746803", gene: "SLC52A3", target: "A" },
+{ rsid: "rs1395", gene: "SLC5A6", target: "A" },
+{ rsid: "rs7903146", gene: "TCF7L2", target: "T" },
+{ rsid: "rs58542926", gene: "TM6SF2", target: "T" },
+{ rsid: "rs6994076", gene: "TTPA", target: "T" },
+{ rsid: "rs731236", gene: "VDR", target: "G" },
+{ rsid: "rs1544410", gene: "VDR", target: "T" },
+{ rsid: "rs2228570", gene: "VDR", target: "X" },
+{ rsid: "rs7975232", gene: "VDR", target: "A" },
+{ rsid: "rs9923231", gene: "VKORC1", target: "T" },
+
+// ============================================================================
+{ section: "12. METALS TRANSPORT & MINERAL HOMEOSTASIS (IRON, MAGNESIUM, ZINC, COPPER)" },
+// ============================================================================
+{ rsid: "rs1800435", gene: "ALAD", target: "G" },
+{ rsid: "rs1061472", gene: "ATP7B", target: "X" },
+{ rsid: "rs1801725", gene: "CASR", target: "T" },
+{ rsid: "rs7914558", gene: "CNNM2", target: "G" },
+{ rsid: "rs701753", gene: "CP", target: "A" },
+{ rsid: "rs884409", gene: "CYBRD1", target: "G" },
+{ rsid: "rs10421768", gene: "HAMP", target: "G" },
+{ rsid: "rs1799945", gene: "HFE", target: "G" },
+{ rsid: "rs1800562", gene: "HFE", target: "A" },
+{ rsid: "rs1800730", gene: "HFE", target: "T" },
+{ rsid: "rs4072037", gene: "MUC1", target: "C" },
+{ rsid: "rs7579", gene: "SELENOP", target: "T" },
+{ rsid: "rs3877899", gene: "SELENOP", target: "T" },
+{ rsid: "rs1776029", gene: "SLC30A10", target: "A" },
+{ rsid: "rs11126936", gene: "SLC30A3", target: "T" },
+{ rsid: "rs13266634", gene: "SLC30A8", target: "C" },
+{ rsid: "rs10981694", gene: "SLC31A1", target: "G" },
+{ rsid: "rs13107325", gene: "SLC39A8", target: "T" },
+{ rsid: "rs11568350", gene: "SLC40A1", target: "A" },
+{ rsid: "rs823156", gene: "SLC41A1", target: "G" },
+{ rsid: "rs1049296", gene: "TF", target: "T" },
+{ rsid: "rs1799852", gene: "TF", target: "T" },
+{ rsid: "rs855791", gene: "TMPRSS6", target: "A" },
+{ rsid: "rs2274924", gene: "TRPM6", target: "C" },
+{ rsid: "rs3750425", gene: "TRPM6", target: "T" },
+{ rsid: "rs8042919", gene: "TRPM7", target: "A" },
+
+// ============================================================================
+{ section: "13. PHARMACOGENOMICS, BLOOD-BRAIN BARRIER & PHASE I/II DETOXIFICATION" },
+// ============================================================================
+{ rsid: "rs1045642", gene: "ABCB1", target: "A" },
+{ rsid: "rs1128503", gene: "ABCB1", target: "A" },
+{ rsid: "rs2032582", gene: "ABCB1", target: "A" },
+{ rsid: "rs2032583", gene: "ABCB1", target: "C" },
+{ rsid: "rs2231142", gene: "ABCG2", target: "T" },
+{ rsid: "rs1229984", gene: "ADH1B", target: "T" },
+{ rsid: "rs671", gene: "ALDH2", target: "A" },
+{ rsid: "rs2244613", gene: "CES1", target: "T" },
+{ rsid: "rs885985", gene: "CLDN5", target: "X" },
+{ rsid: "rs762551", gene: "CYP1A2", target: "C" },
+{ rsid: "rs2069514", gene: "CYP1A2", target: "A" },
+{ rsid: "rs1056836", gene: "CYP1B1", target: "G" },
+{ rsid: "rs1801272", gene: "CYP2A6", target: "T" },
+{ rsid: "rs3745274", gene: "CYP2B6", target: "T" },
+{ rsid: "rs28399499", gene: "CYP2B6", target: "C" },
+{ rsid: "rs4244285", gene: "CYP2C19", target: "A" },
+{ rsid: "rs4986893", gene: "CYP2C19", target: "A" },
+{ rsid: "rs12248560", gene: "CYP2C19", target: "T" },
+{ rsid: "rs28399504", gene: "CYP2C19", target: "G" },
+{ rsid: "rs1057910", gene: "CYP2C9", target: "C" },
+{ rsid: "rs1799853", gene: "CYP2C9", target: "T" },
+{ rsid: "rs7900194", gene: "CYP2C9", target: "A" },
+{ rsid: "rs28371685", gene: "CYP2C9", target: "T" },
+{ rsid: "rs1065852", gene: "CYP2D6", target: "A" },
+{ rsid: "rs3892097", gene: "CYP2D6", target: "T" },
+{ rsid: "rs28371706", gene: "CYP2D6", target: "A" },
+{ rsid: "rs28371725", gene: "CYP2D6", target: "T" },
+{ rsid: "rs59421388", gene: "CYP2D6", target: "T" },
+{ rsid: "rs2031920", gene: "CYP2E1", target: "T" },
+{ rsid: "rs35599367", gene: "CYP3A4", target: "A" },
+{ rsid: "rs776746", gene: "CYP3A5", target: "T" },
+{ rsid: "rs3918290", gene: "DPYD", target: "T" },
+{ rsid: "rs67376798", gene: "DPYD", target: "A" },
+{ rsid: "rs1051740", gene: "EPHX1", target: "C" },
+{ rsid: "rs2234922", gene: "EPHX1", target: "G" },
+{ rsid: "rs3957357", gene: "GSTA1", target: "A" },
+{ rsid: "rs1799931", gene: "NAT2", target: "A" },
+{ rsid: "rs116855232", gene: "NUDT15", target: "T" },
+{ rsid: "rs1057868", gene: "POR", target: "T" },
+{ rsid: "rs12208357", gene: "SLC22A1", target: "T" },
+{ rsid: "rs2289669", gene: "SLC47A1", target: "A" },
+{ rsid: "rs4149056", gene: "SLCO1B1", target: "C" },
+{ rsid: "rs9282861", gene: "SULT1A1", target: "A" },
+{ rsid: "rs2285162", gene: "SULT4A1", target: "A" },
+{ rsid: "rs1142345", gene: "TPMT", target: "C" },
+{ rsid: "rs1800460", gene: "TPMT", target: "T" },
+{ rsid: "rs887829", gene: "UGT1A1", target: "T" },
+{ rsid: "rs2011425", gene: "UGT1A4", target: "G" },
+{ rsid: "rs1902023", gene: "UGT2B15", target: "A" },
+
+// ============================================================================
+{ section: "14. CONNECTIVE TISSUE, HYPERMOBILITY (hEDS), ECM & DURAL INTEGRITY" },
+// ============================================================================
+{ rsid: "rs6007897", gene: "CELSR1", target: "C" },
+{ rsid: "rs1676486", gene: "COL11A1", target: "A" },
+{ rsid: "rs970547", gene: "COL12A1", target: "C" },
+{ rsid: "rs1800012", gene: "COL1A1", target: "A" },
+{ rsid: "rs42524", gene: "COL1A2", target: "C" },
+{ rsid: "rs1800255", gene: "COL3A1", target: "A" },
+{ rsid: "rs13946", gene: "COL5A1", target: "T" },
+{ rsid: "rs2071307", gene: "ELN", target: "A" },
+{ rsid: "rs10519177", gene: "FBN1", target: "G" },
+{ rsid: "rs143383", gene: "GDF5", target: "A" },
+{ rsid: "rs1800449", gene: "LOX", target: "T" },
+{ rsid: "rs1048661", gene: "LOXL1", target: "T" },
+{ rsid: "rs1799750", gene: "MMP1", target: "C" },
+{ rsid: "rs243865", gene: "MMP2", target: "T" },
+{ rsid: "rs679620", gene: "MMP3", target: "T" },
+{ rsid: "rs3918242", gene: "MMP9", target: "T" },
+{ rsid: "rs185819", gene: "TNXB", target: "T" },
+
+// ============================================================================
+{ section: "15. GUT-BRAIN AXIS, OXALATES, MUCOSAL IMMUNITY & INTESTINAL PERMEABILITY" },
+// ============================================================================
+{ rsid: "rs698", gene: "ADH1C", target: "G" },
+{ rsid: "rs34116584", gene: "AGXT", target: "T" },
+{ rsid: "rs4426527", gene: "AGXT", target: "G" },
+{ rsid: "rs1800546", gene: "ALDOB", target: "G" },
+{ rsid: "rs2241880", gene: "ATG16L1", target: "G" },
+{ rsid: "rs10781499", gene: "CARD9", target: "A" },
+{ rsid: "rs11554825", gene: "GPBAR1", target: "C" },
+{ rsid: "rs2000999", gene: "HP", target: "A" },
+{ rsid: "rs13361189", gene: "IRGM", target: "C" },
+{ rsid: "rs1800450", gene: "MBL2", target: "T" },
+{ rsid: "rs5030737", gene: "MBL2", target: "A" },
+{ rsid: "rs7096206", gene: "MBL2", target: "G" },
+{ rsid: "rs2066844", gene: "NOD2", target: "T" },
+{ rsid: "rs2066845", gene: "NOD2", target: "C" },
+{ rsid: "rs188096", gene: "SLC10A2", target: "A" },
+{ rsid: "rs3733591", gene: "SLC26A1", target: "C" },
+{ rsid: "rs4263839", gene: "TNFSF15", target: "A" },
+
+// ============================================================================
+{ section: "16. VASCULAR TONE, COAGULATION, BLOOD VOLUME & HEMATOLOGY" },
+// ============================================================================
+{ rsid: "rs505922", gene: "ABO", target: "C" },
+{ rsid: "rs1799963", gene: "F2", target: "A" },
+{ rsid: "rs6025", gene: "F5", target: "T" },
+{ rsid: "rs1800790", gene: "FGB", target: "A" },
+{ rsid: "rs5918", gene: "ITGB3", target: "C" },
+{ rsid: "rs1063856", gene: "VWF", target: "C" },
+
+// ============================================================================
+{ section: "17. ANTIVIRAL IMMUNITY, INTERFERON SIGNALING & POST-VIRAL ILLNESS (ME/CFS, LONG COVID)" },
+// ============================================================================
+{ rsid: "rs2236757", gene: "IFNAR2", target: "A" },
+{ rsid: "rs12979860", gene: "IFNL4", target: "T" },
+{ rsid: "rs10774671", gene: "OAS1", target: "G" },
+{ rsid: "rs179008", gene: "TLR7", target: "T" },
+{ rsid: "rs34536443", gene: "TYK2", target: "C" },
 ];
 
-        // --- PLACEHOLDER PROMPT TEXT ---
-        const PROMPT_TEXT = "Please act as an expert in nutrigenomics, genetic analysis, functional medicine, and mental health. I have filtered my raw DNA file to find specific variants of interest which I will attach to the end of this prompt. Please consider the effects that each of these SNPs have on the brain and body, with an emphasis on neurochemical effects and mental health implications. Once you have considered each SNP individually, please consider the mechanisms and pathways involved in order to understand how all of these SNPs interact and what the cumulative effect is. Where complex chemical pathways have parts that are upregulated and parts that are downregulated, try to understand exactly where the bottlenecks occur and what the consequences might be. Topics you may want to consider are methylation, transsulfuration, COMT, MAO, serotonin, dopamine, norepinephrine, cortisol, GABA, histamine, estrogen, BDNF, oxytocin, oxidation, inflammation, toxic metabolites, detox, nitric oxide, vitamins, minerals, etc. You are not limited to these topic areas though, please expand your analysis as wide as needed to address the genetic information given. If you are capable of retrieving information from the internet, you may need to do so to understand the effects of each SNP. The SNPs are:\n";
+        // Attach each SNP to the section heading above it
+        const PANEL = [];
+        let currentSection = "";
+        TARGET_SNPS.forEach(entry => {
+            if (entry.section) currentSection = entry.section;
+            else if (entry.rsid) PANEL.push({ ...entry, section: currentSection });
+        });
+        const PANEL_RSIDS = new Set(PANEL.map(item => item.rsid));
+
+        // --- PROMPT TEXT ---
+        const PROMPT_TEXT = `Please act as an expert in human genetics, pharmacogenomics, neuroscience, psychiatry, autonomic medicine and nutrigenomics, and give me a careful, evidence-based analysis of the genetic data at the end of this prompt.
+
+## About the data
+- These are my own genotypes from consumer DNA data (23andMe and/or AncestryDNA raw data, or a whole-genome sequencing VCF). They were filtered against a hand-picked panel of ${PANEL.length} SNPs chosen for relevance to mental health, brain function, energy and the autonomic nervous system, and they are grouped below into biological sections. The panel was put together by a non-expert, so some SNPs on it have weak or disputed evidence. Part of your job is to tell me which findings actually matter.
+- Each line reads "GENE: rsID=genotype". Gene labels are only for orientation. For intergenic or GWAS loci the label is the nearest or reported gene, so identify each rsID yourself.
+- Genotypes are on the forward (+) strand of the human reference genome, as the testing companies report them. Papers often name alleles on the gene's coding strand, which can be the opposite strand. For example, MTHFR C677T (rs1801133) is reported here as G/A, with A corresponding to 677T. Before interpreting a SNP, confirm its alleles and which one is the effect allele on the forward strand. Getting the direction of effect wrong is the most common mistake in this kind of analysis.
+- The list is pre-filtered. Most SNPs appear only if I carry at least one copy of a pre-selected allele of interest. A few where every genotype is informative (such as COMT rs4680 and APOE) are always shown. A SNP that is absent was either not tested or I don't carry that allele, so don't assume anything about absent SNPs.
+- A slash (e.g., rs123=AG/GG) means my data files disagreed. Treat that SNP as uncertain.
+- A single letter instead of two on an X-chromosome SNP means only one X chromosome was read (typical for males).
+
+## What I'd like you to do
+1. **Go section by section.** For each notable genotype, explain what the variant does (direction of effect, rough effect size, whether one or two copies matter) and how strong the evidence is. Interpret SNPs that belong together as haplotypes or combined genotypes (for example APOE rs429358 + rs7412, the COMT haplotype, MTHFR C677T + A1298C, HFE C282Y/H63D, GC rs7041 + rs4588, and CYP2C19/CYP2D6 star alleles).
+2. **Integrate across pathways.** Work out how these variants interact and what their combined effect is likely to be. Where a pathway has some steps up-regulated and others down-regulated, find the likely bottlenecks and their consequences. Examples: methylation and SAMe supply feeding COMT, HNMT and PEMT; BH4 limiting dopamine, serotonin and nitric oxide synthesis; histamine and mast-cell signaling interacting with autonomic symptoms; RAAS, vascular tone and blood volume affecting orthostatic tolerance; HPA-axis and inflammatory genes affecting mood and fatigue; mitochondrial and redox capacity; connective tissue and hypermobility in relation to POTS; circadian and adenosine genes affecting sleep; and cofactor needs (B vitamins, iron, magnesium, vitamin D). Don't stop at these; widen the analysis as far as the data warrants.
+3. **Relate the findings to symptoms and conditions,** especially anxiety, depression and mood, stress resilience, brain fog (focus and memory), fatigue and post-exertional malaise (including ME/CFS and long COVID), sleep, dysautonomia (POTS, orthostatic intolerance, heart rate and blood pressure regulation), migraine, mast cell activation and histamine intolerance, hypermobility, and gut-brain issues.
+4. **Pharmacogenomics.** Summarize clinically actionable drug-gene findings (CPIC/DPWG guidelines where they exist), especially for medications commonly used for the conditions above. Note that consumer genotyping arrays can't detect CYP2D6 deletions or duplications or many rarer star alleles.
+5. **Practical next steps.** Suggest evidence-based lifestyle and nutrition considerations, and lab tests or measurements that could confirm or rule out the main hypotheses (for example homocysteine, B12 and methylmalonic acid, ferritin and iron studies, vitamin D, or orthostatic vital signs), framed as things to discuss with a clinician.
+
+## Ground rules
+- Calibrate confidence. Most of these variants have small effects, and much of the older candidate-gene literature has failed to replicate. For each important claim, say whether it rests on clinical guidelines, replicated GWAS, smaller association studies, or mechanistic or speculative reasoning. If a popular claim about a gene is poorly supported, say so.
+- Genetics shows tendencies, not diagnoses. Frame findings as possibilities to discuss with a clinician.
+- Take your time and check facts. If you can search the internet, verify SNPs against sources like dbSNP, ClinVar, PharmGKB/CPIC and the GWAS Catalog. If you're unsure about a SNP, say so instead of guessing.
+
+## Format
+Open with a short summary of the most important findings. Then give the section-by-section review, the integrated pathway analysis, the symptom and condition discussion, pharmacogenomics, practical next steps, and the main limitations of this analysis, using tables where they help. Finish by asking me for any context that would sharpen the analysis (sex, age, main symptoms, diagnoses, current medications and supplements) and suggesting a few good follow-up questions.
+
+## My genotypes
+
+`;
+
+        const ASSUMED_NOTE = "* Not listed in my VCF file, so assumed to match the reference genome (VCF files normally list only positions that differ from the reference). A few of these may instead be positions that weren't sequenced well.";
 
         // --- DOM ELEMENTS ---
         const fileInput = document.getElementById('fileInput');
@@ -681,12 +1064,16 @@
         const fileListDisplay = document.getElementById('fileListDisplay');
 
         // --- STATE MANAGEMENT ---
-        let parsedResults = []; 
-        let globalMergedGenetics = new Map(); // Stores merged data: Key=RSID, Value=Set of genotypes
+        let parsedResults = [];
+        let globalMergedGenetics = new Map(); // Stores merged data for panel SNPs: Key=RSID, Value=Set of genotypes
+        let assumedGenotypes = new Map(); // Panel SNPs missing from a whole-genome VCF, assumed to match the reference genome
+        let arrayFileRsids = new Set(); // Every RSID seen in 23andMe/Ancestry-style files (for the status count)
+        let vcfVariantCount = 0; // Variants read from VCF files (for the status count)
+        let statusNotes = []; // Warnings about loaded files, shown after the status message
         let uploadedFileNames = []; // Keep track of what we've processed
 
         // --- DRAG & DROP HANDLERS ---
-        
+
         // Prevent default drag behaviors
         ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropArea.addEventListener(eventName, preventDefaults, false);
@@ -742,6 +1129,10 @@
 
         function resetData() {
             globalMergedGenetics.clear();
+            assumedGenotypes.clear();
+            arrayFileRsids.clear();
+            vcfVariantCount = 0;
+            statusNotes = [];
             parsedResults = [];
             uploadedFileNames = [];
             outputArea.value = "";
@@ -756,31 +1147,15 @@
             statusDiv.className = "status-msg";
 
             try {
-                // Array to store the raw text content of each NEW file
-                const fileContents = [];
+                // Files are read one at a time and streamed line by line, because a whole-genome VCF can be several GB
+                const results = [];
+                for (const file of files) {
+                    const source = await unzipIfNeeded(file);
+                    results.push(await parseFile(source.blob, source.name));
+                }
 
-                const promises = files.map(async (file) => {
-                    uploadedFileNames.push(file.name); // Add to display list
-                    let textContent = "";
-                    if (file.name.endsWith('.zip')) {
-                        const zip = new JSZip();
-                        const loadedZip = await zip.loadAsync(file);
-                        const textFileName = Object.keys(loadedZip.files).find(name => name.endsWith('.txt') || name.endsWith('.csv'));
-                        
-                        if (!textFileName) {
-                            throw new Error(`No .txt or .csv file found inside ${file.name}`);
-                        }
-                        
-                        textContent = await loadedZip.file(textFileName).async("string");
-                    } else {
-                        textContent = await file.text();
-                    }
-                    return textContent;
-                });
-
-                const results = await Promise.all(promises);
-                
                 // Add new results to global state
+                files.forEach(file => uploadedFileNames.push(file.name)); // Add to display list
                 mergeNewData(results);
 
             } catch (err) {
@@ -790,55 +1165,379 @@
             }
         }
 
-        function parseRawText(rawText) {
-            const geneMap = new Map();
-            const lines = rawText.split('\n');
+        async function unzipIfNeeded(file) {
+            if (!/\.zip$/i.test(file.name)) return { name: file.name, blob: file };
 
-            for (let line of lines) {
-                line = line.trim();
-                if (!line || line.startsWith('#') || line.startsWith('rsid')) continue; 
+            const zip = new JSZip();
+            const loadedZip = await zip.loadAsync(file);
+            const dataFileName = Object.keys(loadedZip.files).find(name =>
+                !loadedZip.files[name].dir && !name.startsWith('__MACOSX') && /\.(txt|csv|vcf|gz)$/i.test(name));
 
-                const parts = line.split(/\s+/);
-                
-                if (parts.length >= 4) {
+            if (!dataFileName) {
+                throw new Error(`No .txt, .csv or .vcf file found inside ${file.name}`);
+            }
+
+            return { name: dataFileName, blob: await loadedZip.file(dataFileName).async("blob") };
+        }
+
+        // Reads one data file and returns the panel genotypes it contains. The format is detected from the first line:
+        // VCF files start with "##fileformat=VCF"; anything else is treated as a 23andMe/Ancestry-style raw data file.
+        async function parseFile(blob, name) {
+            const result = {
+                name,
+                genotypes: new Map(), // RSID -> Set of genotypes
+                assumed: new Map(),   // RSID -> Set of genotypes (VCF only, see ASSUMED_NOTE)
+                rsids: null,          // Set of all RSIDs in the file (raw data files only)
+                variantCount: 0,      // Number of variants read (VCF only)
+                notes: []
+            };
+            let parser = null;
+            let lastProgressUpdate = 0;
+
+            await forEachLine(blob, line => {
+                if (!parser) {
+                    if (!line.trim()) return;
+                    parser = (line.startsWith('##fileformat=VCF') || line.startsWith('#CHROM')) ? vcfParser(result) : rawDataParser(result);
+                }
+                parser.line(line);
+            }, fraction => {
+                if (Date.now() - lastProgressUpdate < 250) return;
+                lastProgressUpdate = Date.now();
+                statusDiv.textContent = `Processing new file(s)... (${name}: ${Math.floor(fraction * 100)}%)`;
+            });
+
+            if (parser) parser.finish();
+            const snpCount = result.rsids ? result.rsids.size : result.variantCount;
+            if (snpCount === 0) {
+                throw new Error(`No genetic data found in ${name}`);
+            }
+            return result;
+        }
+
+        // 23andMe, AncestryDNA and similar raw data files: one SNP per line (rsid, chromosome, position, genotype)
+        function rawDataParser(result) {
+            result.rsids = new Set();
+            return {
+                line(line) {
+                    line = line.trim();
+                    if (!line || line.startsWith('#') || /^"?rsid/i.test(line)) return;
+
+                    const parts = line.replace(/"/g, '').split(/[\s,]+/);
+                    if (parts.length < 4 || !/^\d+$/.test(parts[2])) return; // rsid, chromosome, position, genotype
+
                     const rsid = parts[0];
-                    let genotype = "";
-
                     // Ancestry (5 cols) vs 23andMe (4 cols)
-                    if (parts.length === 5) {
-                        genotype = parts[3] + parts[4]; 
-                    } else {
-                        genotype = parts[parts.length - 1];
+                    const genotype = parts.length === 5 ? parts[3] + parts[4] : parts[parts.length - 1];
+                    result.rsids.add(rsid);
+
+                    // Only panel SNPs are kept. No-calls ("--" in 23andMe, "0 0" in Ancestry) are skipped.
+                    if (!PANEL_RSIDS.has(rsid) || !genotype || /[-0]/.test(genotype)) return;
+
+                    // NORMALIZE GENOTYPE: Sort letters alphabetically so TG == GT
+                    result.genotypes.set(rsid, new Set([genotype.split('').sort().join('')]));
+                },
+                finish() {}
+            };
+        }
+
+        // VCF files (e.g. whole-genome sequencing): CHROM POS ID REF ALT QUAL FILTER INFO FORMAT SAMPLE...
+        // Panel SNPs are found by rsID (ID column) and, when the genome build is known, by chromosome position
+        // (many VCFs have no rsIDs). Genotypes are converted from VCF allele numbers (0/1) to letters (AG).
+        function vcfParser(result) {
+            let build = null;           // 37 or 38, read from the header
+            let index = null;           // Positions of the panel SNPs in that build
+            let cursors = null;         // Per chromosome: next panel SNP position, used to find SNPs inside gVCF reference blocks
+            let haveColumns = false;
+            const seen = new Set();     // Panel SNPs this file has a record for (including no-calls)
+            const refOnly = new Set();  // Panel SNPs whose genotype so far is homozygous reference
+            let homRefRecords = 0, nonRefRecords = 0, haploidX = 0, diploidX = 0;
+
+            function addGenotype(rsid, genotype, isRef) {
+                // Multi-allelic sites can be split over several records, e.g. G>A (0/1) and G>C (0/0).
+                // The record carrying a non-reference allele wins over a homozygous reference record.
+                if (!result.genotypes.has(rsid) || refOnly.has(rsid)) {
+                    result.genotypes.set(rsid, new Set([genotype]));
+                    if (isRef) refOnly.add(rsid); else refOnly.delete(rsid);
+                } else if (!isRef) {
+                    result.genotypes.get(rsid).add(genotype);
+                }
+            }
+
+            function readHeader(line) {
+                if (line.startsWith('##')) {
+                    const chr1 = line.match(/^##contig=<ID=(?:chr)?1,.*?length=(\d+)/);
+                    if (chr1) {
+                        if (chr1[1] === '249250621') build = 37;
+                        if (chr1[1] === '248956422') build = 38;
+                    } else if (!build && /^##(reference|assembly)=/.test(line)) {
+                        if (/GRCh38|hg38|hs38|b38/i.test(line)) build = 38;
+                        else if (/GRCh37|hg19|hs37|b37|g1k_v37/i.test(line)) build = 37;
                     }
-                    
-                    if (genotype) {
-                        // NORMALIZE GENOTYPE: Sort letters alphabetically so TG == GT
-                        // 1. Split into array ("TG" -> ["T", "G"])
-                        // 2. Sort array (["G", "T"])
-                        // 3. Join back to string ("GT")
-                        genotype = genotype.split('').sort().join('');
-                        geneMap.set(rsid, genotype);
+                    return;
+                }
+                if (line.startsWith('#CHROM')) {
+                    haveColumns = true;
+                    const columns = line.split('\t');
+                    if (columns.length < 10) {
+                        throw new Error(`${result.name} has no genotype column, so there is nothing to read from it`);
+                    }
+                    if (columns.length > 10) {
+                        result.notes.push(`Note: ${result.name} contains ${columns.length - 9} samples; only the first one (${columns[9]}) was used.`);
+                    }
+                    if (build) {
+                        index = positionIndex(build);
+                        cursors = new Map();
+                        index.byChrom.forEach((list, chrom) => cursors.set(chrom, { list, next: 0, previous: null }));
+                    } else {
+                        result.notes.push(`Note: couldn't tell which genome build ${result.name} uses, so only SNPs labeled with rsIDs could be matched.`);
                     }
                 }
             }
-            return geneMap;
+
+            // gVCF files cover stretches of reference genotype with one "block" record (ALT <NON_REF>, INFO END=...).
+            // Called for each panel SNP position the file has moved past without a record of its own.
+            function checkReferenceBlock(snp, blockLine) {
+                if (!blockLine || seen.has(snp.rsid)) return;
+                const fields = blockLine.split('\t');
+                if (!isReferenceOnly(fields[4])) return;
+                const end = /(?:^|;)END=(\d+)/.exec(fields[7]);
+                if (!end || Number(end[1]) < snp.pos) return;
+
+                seen.add(snp.rsid);
+                const calls = (fields[9] || '').split(':')[0].split(/[\/|]/);
+                if (calls.every(call => call === '0')) addGenotype(snp.rsid, snp.ref.repeat(calls.length), true);
+            }
+
+            return {
+                line(line) {
+                    if (line.startsWith('#')) return readHeader(line);
+                    if (!haveColumns) return;
+
+                    // Find the tab-separated columns without splitting the whole line (VCF lines can be long)
+                    const tabs = [];
+                    let tab = -1;
+                    while (tabs.length < 10 && (tab = line.indexOf('\t', tab + 1)) !== -1) tabs.push(tab);
+                    if (tabs.length < 9) return;
+                    const chrom = line.substring(0, tabs[0]);
+                    const pos = line.substring(tabs[0] + 1, tabs[1]);
+                    const id = line.substring(tabs[1] + 1, tabs[2]);
+                    const ref = line.substring(tabs[2] + 1, tabs[3]).toUpperCase();
+                    const alt = line.substring(tabs[3] + 1, tabs[4]);
+                    const sample = line.substring(tabs[8] + 1, tabs.length > 9 ? tabs[9] : line.length);
+                    const gt = line.startsWith('GT', tabs[7] + 1) ? sample.split(':')[0] : '.';
+                    const calls = gt.split(/[\/|]/).filter(call => call !== '.');
+                    const isRef = calls.length > 0 && calls.every(call => call === '0');
+                    const referenceOnly = isReferenceOnly(alt);
+
+                    if (calls.length > 0) {
+                        if (!referenceOnly) result.variantCount++;
+                        if (isRef) homRefRecords++;
+                        else if (!referenceOnly) nonRefRecords++;
+                        if (chrom === 'X' || chrom === 'chrX') {
+                            if (/[\/|]/.test(gt)) diploidX++; else haploidX++;
+                        }
+                    }
+
+                    if (cursors) {
+                        const cursor = cursors.get(chrom);
+                        if (cursor) {
+                            const position = Number(pos);
+                            while (cursor.next < cursor.list.length && cursor.list[cursor.next].pos < position) {
+                                checkReferenceBlock(cursor.list[cursor.next++], cursor.previous);
+                            }
+                            cursor.previous = line;
+                        }
+                    }
+
+                    // Which panel SNPs does this record belong to?
+                    const matches = [];
+                    if (id !== '.') {
+                        id.split(';').forEach(name => { if (PANEL_RSIDS.has(name)) matches.push(name); });
+                    }
+                    const atPosition = index && index.byPos.get(chrom) && index.byPos.get(chrom).get(pos);
+                    if (atPosition) {
+                        // Only single-letter records whose reference base is the expected one (guards against indels and build mix-ups)
+                        atPosition.forEach(snp => { if (ref === snp.ref && !matches.includes(snp.rsid)) matches.push(snp.rsid); });
+                    }
+                    if (matches.length === 0) return;
+
+                    const genotype = calls.length > 0 ? vcfGenotype(ref, alt, calls) : null;
+                    matches.forEach(rsid => {
+                        seen.add(rsid);
+                        if (genotype) addGenotype(rsid, genotype, isRef);
+                    });
+                },
+
+                finish() {
+                    if (!haveColumns) {
+                        throw new Error(`${result.name} doesn't look like a complete VCF file (no #CHROM header line found)`);
+                    }
+                    if (cursors) {
+                        cursors.forEach(cursor => {
+                            while (cursor.next < cursor.list.length) checkReferenceBlock(cursor.list[cursor.next++], cursor.previous);
+                        });
+                    }
+
+                    // A whole-genome VCF normally lists only the positions where a person differs from the reference genome,
+                    // so a panel SNP with no record most likely matches the reference. This is only assumed for files that
+                    // look like that: whole-genome sized (exomes and array-derived VCFs are much smaller) and variants only.
+                    if (index && nonRefRecords >= 1000000 && homRefRecords < nonRefRecords) {
+                        const oneX = haploidX > diploidX;
+                        index.all.forEach(snp => {
+                            if (seen.has(snp.rsid) || snp.chrom === 'Y') return;
+                            const copies = (oneX && snp.chrom === 'X' && !inPseudoautosomalRegion(snp.pos, build)) ? 1 : 2;
+                            result.assumed.set(snp.rsid, new Set([snp.ref.repeat(copies)]));
+                        });
+                    }
+                }
+            };
         }
 
-        function mergeNewData(newFileContents) {
-            let totalSnpsParsed = 0;
+        function isReferenceOnly(alt) {
+            return alt === '.' || alt === '<NON_REF>' || alt === '<*>';
+        }
 
-            // 1. Parse ONLY the new files and add to globalMergedGenetics
-            newFileContents.forEach(rawText => {
-                const map = parseRawText(rawText);
-                totalSnpsParsed += map.size;
+        function inPseudoautosomalRegion(pos, build) {
+            return build === 37 ? (pos <= 2699520 || pos >= 154931044) : (pos <= 2781479 || pos >= 155701383);
+        }
 
-                for (const [rsid, genotype] of map.entries()) {
-                    if (!globalMergedGenetics.has(rsid)) {
-                        globalMergedGenetics.set(rsid, new Set());
+        // Turns VCF allele numbers into letters, e.g. REF=G ALT=A and calls ["0","1"] -> "AG".
+        // Insertions/deletions use the 23andMe convention: I = longer allele, D = shorter allele.
+        function vcfGenotype(ref, alt, calls) {
+            const alleles = [ref].concat(alt === '.' ? [] : alt.toUpperCase().split(','));
+            const sequences = alleles.filter(allele => allele[0] !== '<' && allele !== '*');
+            const singleLetters = sequences.every(allele => allele.length === 1);
+            const shortest = Math.min(...sequences.map(allele => allele.length));
+            const letters = [];
+            for (const call of calls) {
+                const allele = alleles[Number(call)];
+                if (!allele || allele[0] === '<') return null;
+                if (allele === '*') letters.push('D');
+                else if (singleLetters) letters.push(allele);
+                else letters.push(allele.length > shortest ? 'I' : 'D');
+            }
+            return letters.sort().join('');
+        }
+
+        // Looks up panel SNP positions for genome build 37 or 38 (from SNP_POSITIONS at the bottom of this file)
+        const positionIndexes = {};
+        function positionIndex(build) {
+            if (positionIndexes[build]) return positionIndexes[build];
+            const index = { byPos: new Map(), byChrom: new Map(), all: [] };
+            PANEL.forEach(item => {
+                const known = SNP_POSITIONS[item.rsid];
+                const pos = known && (build === 37 ? known[1] : known[2]);
+                if (!pos) return;
+                const snp = { rsid: item.rsid, chrom: known[0], pos, ref: (build === 38 && known[4]) || known[3] };
+                index.all.push(snp);
+                // VCFs name chromosomes either "1" or "chr1"
+                const names = snp.chrom === 'MT' ? ['MT', 'M', 'chrM', 'chrMT'] : [snp.chrom, 'chr' + snp.chrom];
+                names.forEach(name => {
+                    if (!index.byPos.has(name)) {
+                        index.byPos.set(name, new Map());
+                        index.byChrom.set(name, []);
+                    }
+                    const atPos = index.byPos.get(name);
+                    if (!atPos.has(String(pos))) atPos.set(String(pos), []);
+                    atPos.get(String(pos)).push(snp);
+                    index.byChrom.get(name).push(snp);
+                });
+            });
+            index.byChrom.forEach(list => list.sort((a, b) => a.pos - b.pos));
+            return positionIndexes[build] = index;
+        }
+
+        // Calls onLine for every line of the file, decompressing .gz files on the fly
+        async function forEachLine(blob, onLine, onProgress) {
+            const decoder = new TextDecoder();
+            let leftover = "";
+            const handleText = text => {
+                let start = 0, newline;
+                while ((newline = text.indexOf('\n', start)) !== -1) {
+                    const end = (newline > start && text.charCodeAt(newline - 1) === 13) ? newline - 1 : newline; // Windows line endings
+                    onLine(text.substring(start, end));
+                    start = newline + 1;
+                }
+                leftover = text.substring(start);
+            };
+            for await (const chunk of readBytes(blob, onProgress)) {
+                handleText(leftover + decoder.decode(chunk, { stream: true }));
+            }
+            handleText(leftover + decoder.decode() + '\n');
+        }
+
+        async function* readBytes(blob, onProgress) {
+            const header = new Uint8Array(await blob.slice(0, 18).arrayBuffer());
+            const gzipped = header[0] === 0x1f && header[1] === 0x8b;
+            if (gzipped && typeof DecompressionStream === 'undefined') {
+                throw new Error("This browser can't open .gz files. Please decompress the file first and try again.");
+            }
+
+            // bgzip (the usual .vcf.gz format) is many small gzip blocks back to back. Browsers only decompress
+            // one block per stream, so each block is decompressed separately, using the block size in its header.
+            const bgzip = gzipped && (header[3] & 4) && header[12] === 66 && header[13] === 67;
+            if (bgzip) {
+                let offset = 0, carry = new Uint8Array(0);
+                while (offset < blob.size) {
+                    const slice = new Uint8Array(await blob.slice(offset, offset + 8 * 1024 * 1024).arrayBuffer());
+                    offset += slice.length;
+                    const data = new Uint8Array(carry.length + slice.length);
+                    data.set(carry);
+                    data.set(slice, carry.length);
+                    let p = 0;
+                    while (p + 18 <= data.length) {
+                        if (data[p] !== 0x1f || data[p + 1] !== 0x8b) throw new Error("The .gz file appears to be damaged.");
+                        const blockSize = (data[p + 16] | (data[p + 17] << 8)) + 1;
+                        if (p + blockSize > data.length) break;
+                        yield await gunzip(data.subarray(p, p + blockSize));
+                        p += blockSize;
+                    }
+                    carry = data.slice(p);
+                    onProgress(offset / blob.size);
+                }
+                return;
+            }
+
+            let bytesRead = 0;
+            let stream = blob.stream().pipeThrough(new TransformStream({
+                transform(chunk, controller) { bytesRead += chunk.length; controller.enqueue(chunk); }
+            }));
+            if (gzipped) stream = stream.pipeThrough(new DecompressionStream('gzip'));
+            const reader = stream.getReader();
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) return;
+                yield value;
+                onProgress(bytesRead / blob.size);
+            }
+        }
+
+        async function gunzip(bytes) {
+            const stream = new DecompressionStream('gzip');
+            const writer = stream.writable.getWriter();
+            writer.write(bytes).catch(() => {});
+            writer.close().catch(() => {});
+            return new Uint8Array(await new Response(stream.readable).arrayBuffer());
+        }
+
+        function mergeNewData(newResults) {
+            const addAll = (target, source) => {
+                for (const [rsid, genotypes] of source.entries()) {
+                    if (!target.has(rsid)) {
+                        target.set(rsid, new Set());
                     }
                     // Since genotype is normalized (sorted), Set handles deduplication
-                    globalMergedGenetics.get(rsid).add(genotype);
+                    genotypes.forEach(genotype => target.get(rsid).add(genotype));
                 }
+            };
+
+            // 1. Add the new files' results to the global data
+            newResults.forEach(result => {
+                addAll(globalMergedGenetics, result.genotypes);
+                addAll(assumedGenotypes, result.assumed);
+                if (result.rsids) result.rsids.forEach(rsid => arrayFileRsids.add(rsid));
+                vcfVariantCount += result.variantCount;
+                statusNotes.push(...result.notes);
             });
 
             // 2. Refresh the Analysis based on GLOBAL data
@@ -850,47 +1549,69 @@
         }
 
         function analyzeAndDisplay() {
-            if (globalMergedGenetics.size === 0) {
+            const totalSnps = arrayFileRsids.size + vcfVariantCount;
+            if (totalSnps === 0) {
                  return; // Nothing to do
             }
 
             parsedResults = [];
 
             // Compare Global Data against Target List
-            TARGET_SNPS.forEach(item => {
-                if (globalMergedGenetics.has(item.rsid)) {
-                    const genotypeSet = globalMergedGenetics.get(item.rsid);
-                    const genotypeArray = Array.from(genotypeSet); 
-                    
-                    // Create string. If conflict (e.g. AA and AG), it becomes "AA/AG"
-                    // If no conflict (e.g. GT and TG were normalized to GT), it is just "GT"
-                    const combinedGenotype = genotypeArray.join("/"); 
+            PANEL.forEach(item => {
+                // A genotype actually read from a file always wins over one assumed from a VCF
+                let genotypeSet = globalMergedGenetics.get(item.rsid);
+                const assumed = !genotypeSet;
+                if (assumed) genotypeSet = assumedGenotypes.get(item.rsid);
+                if (!genotypeSet) return;
 
-                    let isMatch = false;
+                // Create string. If conflict (e.g. AA and AG), it becomes "AA/AG"
+                // If no conflict (e.g. GT and TG were normalized to GT), it is just "GT"
+                const combinedGenotype = Array.from(genotypeSet).join("/");
 
-                    if (item.target === "X") {
-                        isMatch = true;
-                    } else {
-                        if (combinedGenotype.includes(item.target)) {
-                            isMatch = true;
-                        }
-                    }
+                const isMatch = item.target === "X" || combinedGenotype.includes(item.target);
 
-                    if (isMatch) {
-                        parsedResults.push(`${item.rsid}=${combinedGenotype}`);
-                    }
+                if (isMatch) {
+                    parsedResults.push({
+                        section: item.section,
+                        gene: item.gene,
+                        text: `${item.rsid}=${combinedGenotype}${assumed ? "*" : ""}`,
+                        assumed
+                    });
                 }
             });
 
             reformatOutput();
-            statusDiv.textContent = `Success! Total unique SNPs in memory: ${globalMergedGenetics.size}. Found ${parsedResults.length} matches across all loaded files.`;
+            statusDiv.textContent = `Success! Total unique SNPs in memory: ${totalSnps}. Found ${parsedResults.length} matches across all loaded files.`
+                + (statusNotes.length ? " " + statusNotes.join(" ") : "");
             statusDiv.className = "status-msg success";
+        }
+
+        // Groups the results by section, then by gene:  "### 1. METHYLATION ..." / "MTHFR: rs1801131=GT, rs1801133=AG"
+        function formatResults() {
+            const sections = new Map();
+            parsedResults.forEach(result => {
+                const section = result.section || "OTHER";
+                const gene = result.gene || "(gene not listed)";
+                if (!sections.has(section)) sections.set(section, new Map());
+                const genes = sections.get(section);
+                if (!genes.has(gene)) genes.set(gene, []);
+                genes.get(gene).push(result.text);
+            });
+
+            const blocks = [];
+            sections.forEach((genes, section) => {
+                const lines = [`### ${section}`];
+                genes.forEach((calls, gene) => lines.push(`${gene}: ${calls.join(", ")}`));
+                blocks.push(lines.join("\n"));
+            });
+            if (parsedResults.some(result => result.assumed)) blocks.push(ASSUMED_NOTE);
+            return blocks.join("\n\n");
         }
 
         function reformatOutput() {
             if (parsedResults.length === 0) return;
 
-            const listString = parsedResults.join(", ");
+            const listString = formatResults();
             const showPrompt = promptToggle.checked;
 
             if (showPrompt) {
@@ -903,14 +1624,667 @@
         function copyToClipboard() {
             const copyText = document.getElementById("output");
             copyText.select();
-            copyText.setSelectionRange(0, 99999); 
+            copyText.setSelectionRange(0, 99999);
             navigator.clipboard.writeText(copyText.value);
-            
+
             const btn = document.querySelector('.copy-btn');
             const originalText = btn.textContent;
             btn.textContent = "Copied!";
             setTimeout(() => btn.textContent = originalText, 2000);
         }
+
+        // --- SNP POSITIONS (ONLY USED FOR VCF FILES) ---
+        // rsid: [chromosome, GRCh37 position, GRCh38 position, reference allele (+ strand), GRCh38 reference allele if different]
+        // From Ensembl. Lets the tool find panel SNPs in VCFs that have no rsIDs, and fill in reference genotypes.
+        // SNPs missing from this table are still found in VCFs that list rsIDs; no need to add new SNPs here.
+        const SNP_POSITIONS = {
+            rs819147: ["20", 32889704, 34301898, "C"],
+            rs819171: ["20", 32867984, 34280178, "C"],
+            rs2276724: ["3", 125854409, 126135566, "T"],
+            rs3733890: ["5", 78421959, 79126136, "G"],
+            rs567754: ["5", 78416416, 79120593, "C"],
+            rs651852: ["5", 78409060, 79113237, "C"],
+            rs558660: ["11", 59603894, 59836421, "A"],
+            rs234706: ["21", 44485350, 43065240, "G"],
+            rs1801181: ["21", 44480616, 43060506, "G"],
+            rs12676: ["3", 53857803, 53823776, "A"],
+            rs41281112: ["13", 100518634, 99866380, "C"],
+            rs1021737: ["1", 70904800, 70439117, "G"],
+            rs482843: ["1", 70872380, 70406697, "A"],
+            rs1801222: ["10", 17156151, 17114152, "A"],
+            rs1643659: ["5", 79934836, 80639017, "T"],
+            rs1650697: ["5", 79950781, 80654962, "A"],
+            rs2431332: ["5", 78321109, 79025286, "A"],
+            rs202676: ["11", 49227620, 49206068, "A"],
+            rs601338: ["19", 49206674, 48703417, "G"],
+            rs602662: ["19", 49206985, 48703728, "G"],
+            rs1288775: ["15", 45661678, 45369480, "T"],
+            rs10948059: ["6", 42928461, 42960723, "C"],
+            rs7087728: ["10", 82033470, 80273714, "G"],
+            rs9473555: ["6", 49409487, 49441774, "G"],
+            rs2236225: ["14", 64908845, 64442127, "G"],
+            rs6922269: ["6", 151252985, 150931849, "G"],
+            rs1801131: ["1", 11854476, 11794419, "T"],
+            rs1801133: ["1", 11856378, 11796321, "G"],
+            rs2274976: ["1", 11850927, 11790870, "C"],
+            rs4846049: ["1", 11850365, 11790308, "T"],
+            rs6495446: ["15", 80154982, 79862640, "C"],
+            rs1805087: ["1", 237048500, 236885200, "A"],
+            rs2275565: ["1", 237048676, 236885376, "G"],
+            rs1532268: ["5", 7878179, 7878066, "C"],
+            rs1801394: ["5", 7870973, 7870860, "A"],
+            rs10380: ["5", 7897191, 7897078, "C"],
+            rs162036: ["5", 7885959, 7885846, "A"],
+            rs694539: ["11", 114133419, 114262697, "C"],
+            rs7946: ["17", 17409560, 17506246, "C"],
+            rs12325817: ["17", 17486519, 17583205, "C"],
+            rs2073817: ["9", 136559460, 133694338, "C"],
+            rs1979277: ["17", 18232096, 18328782, "G"],
+            rs1051266: ["21", 46957794, 45537880, "T"],
+            rs7873937: ["9", 108089321, 105327040, "G"],
+            rs3199966: ["9", 108147763, 105385482, "T"],
+            rs2239907: ["17", 26725744, 28398728, "T"],
+            rs773115: ["12", 56398454, 56004670, "G"],
+            rs526934: ["11", 59633493, 59866020, "G"],
+            rs34324219: ["11", 59623378, 59855905, "C"],
+            rs1801198: ["22", 31011610, 30615623, "G"],
+            rs9606756: ["22", 31006860, 30610873, "A"],
+            rs699517: ["18", 673016, 673016, "C"],
+            rs1800497: ["11", 113270828, 113400106, "G"],
+            rs1044396: ["20", 61981134, 63349782, "G"],
+            rs4633: ["22", 19950235, 19962712, "C"],
+            rs4680: ["22", 19951271, 19963748, "G"],
+            rs4818: ["22", 19951207, 19963684, "C"],
+            rs6267: ["22", 19950263, 19962740, "G"],
+            rs6269: ["22", 19949952, 19962429, "A"],
+            rs165599: ["22", 19956781, 19969258, "G"],
+            rs737865: ["22", 19930121, 19942598, "A"],
+            rs6271: ["9", 136522274, 133657152, "C"],
+            rs1108580: ["9", 136505114, 133639992, "A"],
+            rs1611115: ["9", 136500515, 133635393, "T"],
+            rs2519152: ["9", 136509634, 133644512, "T"],
+            rs921451: ["7", 50623285, 50555587, "T"],
+            rs11575542: ["7", 50530987, 50463289, "C"],
+            rs4532: ["5", 174870150, 175443147, "C"],
+            rs6277: ["11", 113283459, 113412737, "G"],
+            rs1076560: ["11", 113283688, 113412966, "C"],
+            rs1801028: ["11", 113283484, 113412762, "G"],
+            rs2283265: ["11", 113285536, 113414814, "C"],
+            rs12364283: ["11", 113346955, 113476233, "A"],
+            rs6280: ["3", 113890815, 114171968, "C"],
+            rs747302: ["11", 636689, 636689, "G"],
+            rs1800955: ["11", 636784, 636784, "T"],
+            rs3783641: ["14", 55360139, 54893421, "T"],
+            rs8007267: ["14", 55378991, 54912273, "C"],
+            rs10483639: ["14", 55306457, 54839739, "G"],
+            rs4411417: ["14", 55320563, 54853845, "T"],
+            rs6323: ["X", 43591036, 43731789, "G"],
+            rs1137070: ["X", 43603391, 43744144, "T"],
+            rs979605: ["X", 43601363, 43742116, "A"],
+            rs1799836: ["X", 43627999, 43768752, "T"],
+            rs834829: ["2", 157200849, 156344337, "A"],
+            rs876493: ["17", 37824545, 39668292, "G"],
+            rs907094: ["17", 37790371, 39634118, "G"],
+            rs3819331: ["11", 112099410, 112228687, "T"],
+            rs1031326: ["4", 17488064, 17486441, "T"],
+            rs1390938: ["8", 20036713, 20179202, "A"],
+            rs363387: ["10", 119003564, 117244053, "T"],
+            rs363276: ["10", 119033809, 117274298, "T"],
+            rs3088442: ["6", 160872652, 160451620, "G"],
+            rs5569: ["16", 55731835, 55697923, "G"],
+            rs2242446: ["16", 55690425, 55656513, "C"],
+            rs28386840: ["16", 55686818, 55652906, "T"],
+            rs27072: ["5", 1394522, 1394407, "C"],
+            rs40184: ["5", 1395077, 1394962, "C"],
+            rs6347: ["5", 1411412, 1411297, "T"],
+            rs1876487: ["2", 73114352, 72887223, "A"],
+            rs6356: ["11", 2190951, 2169721, "C"],
+            rs10770141: ["11", 2193840, 2172610, "A"],
+            rs2070762: ["11", 2186335, 2165105, "A"],
+            rs1480544: ["4", 170987636, 170066485, "A"],
+            rs1731017: ["16", 8839954, 8746097, "A"],
+            rs2121337: ["2", 135600925, 134843355, "T"],
+            rs2760118: ["6", 24503590, 24503362, "C"],
+            rs4446909: ["X", 1733783, 1614890, "G"],
+            rs1803274: ["3", 165491280, 165773492, "C"],
+            rs3810950: ["10", 50824619, 49616573, "G"],
+            rs8191992: ["7", 136701308, 137016561, "T"],
+            rs16969968: ["15", 78882925, 78590583, "G"],
+            rs6494223: ["15", 32396457, 32104256, "C"],
+            rs806380: ["6", 88864653, 88154934, "A"],
+            rs1049353: ["6", 88853635, 88143916, "C"],
+            rs2501432: ["1", 24201920, 23875430, "T"],
+            rs2111902: ["12", 109278747, 108884971, "T"],
+            rs324420: ["1", 46870761, 46405089, "C"],
+            rs2279020: ["5", 161322889, 161895883, "G"],
+            rs279858: ["4", 46314593, 46312576, "T"],
+            rs3219151: ["5", 161128914, 161701908, "C"],
+            rs187269: ["5", 160756625, 161329618, "A"],
+            rs211037: ["5", 161528280, 162101274, "C"],
+            rs2241165: ["2", 171678379, 170821869, "C"],
+            rs3749034: ["2", 171673475, 170816965, "G"],
+            rs3791878: ["2", 171672191, 170815681, "G"],
+            rs2236418: ["10", 26505496, 26216567, "A"],
+            rs548294: ["5", 152868437, 153488877, "T"],
+            rs2832407: ["21", 30967508, 29595188, "C"],
+            rs1954787: ["11", 120663363, 120792654, "T"],
+            rs1806201: ["12", 13717508, 13564574, "G"],
+            rs7301328: ["12", 14018777, 13865843, "G"],
+            rs6465084: ["7", 86403475, 86774159, "A"],
+            rs6295: ["5", 63258565, 63962738, "C"],
+            rs1364043: ["5", 63250851, 63955024, "T"],
+            rs6296: ["6", 78172260, 77462543, "C"],
+            rs6795209: ["3", 88210464, 88161314, "A"],
+            rs6311: ["13", 47471478, 46897343, "C"],
+            rs6313: ["13", 47469940, 46895805, "G"],
+            rs6314: ["13", 47409034, 46834899, "G"],
+            rs7997012: ["13", 47411985, 46837850, "A"],
+            rs79874540: ["2", 231988421, 231123707, "G"],
+            rs3813929: ["X", 113818520, 114584047, "C"],
+            rs1414334: ["X", 114138144, 114903581, "C"],
+            rs1062613: ["11", 113846006, 113975284, "T"],
+            rs1176744: ["11", 113803028, 113932306, "A"],
+            rs7820268: ["8", 39777529, 39920010, "C"],
+            rs9657182: ["8", 39765848, 39908329, "C"],
+            rs10109853: ["8", 39862881, 40005362, "C"],
+            rs1053230: ["1", 241755348, 241592046, "C"],
+            rs604300: ["3", 127442852, 127724009, "A"],
+            rs324981: ["7", 34818113, 34778501, "A"],
+            rs16147: ["7", 24323410, 24283791, "T"],
+            rs16139: ["7", 24324879, 24285260, "T"],
+            rs1051660: ["8", 54163562, 53251002, "C"],
+            rs1799971: ["6", 154360797, 154039662, "A"],
+            rs53576: ["3", 8804371, 8762685, "A"],
+            rs2254298: ["3", 8802228, 8760542, "G"],
+            rs301430: ["9", 4576680, 4576680, "T"],
+            rs4354668: ["11", 35440976, 35419429, "T"],
+            rs1013940: ["2", 108608648, 107992192, "A"],
+            rs25531: ["17", 28564346, 30237328, "T"],
+            rs140701: ["17", 28538532, 30211514, "C"],
+            rs25532: ["17", 28564170, 30237152, "G"],
+            rs3755907: ["4", 156821875, 155900723, "G"],
+            rs1799913: ["11", 18047255, 18025708, "G"],
+            rs4570625: ["12", 72331923, 71938143, "G"],
+            rs1386494: ["12", 72352543, 71958763, "T"],
+            rs7305115: ["12", 72372862, 71979082, "A"],
+            rs4343: ["17", 61566031, 63488670, "G"],
+            rs2106809: ["X", 15618061, 15599938, "A"],
+            rs6693567: ["1", 150510660, 150538184, "C"],
+            rs4961: ["4", 2906707, 2904980, "G"],
+            rs1048101: ["8", 26628028, 26770511, "A"],
+            rs1800544: ["10", 112836503, 111076745, "G"],
+            rs1801252: ["10", 115804036, 114044277, "A"],
+            rs1801253: ["10", 115805056, 114045297, "G"],
+            rs1042713: ["5", 148206440, 148826877, "G"],
+            rs1042714: ["5", 148206473, 148826910, "G"],
+            rs1800888: ["5", 148206885, 148827322, "C"],
+            rs699: ["1", 230845794, 230710048, "A"],
+            rs4762: ["1", 230845977, 230710231, "G"],
+            rs5186: ["3", 148459988, 148742201, "A"],
+            rs1042615: ["12", 63544209, 63150429, "A"],
+            rs1799722: ["14", 96671139, 96204802, "C"],
+            rs7165327: ["15", 55158922, 54866724, "A"],
+            rs1051730: ["15", 78894339, 78601997, "G"],
+            rs12722: ["9", 137734416, 134842570, "C"],
+            rs1799998: ["8", 143999600, 142918184, "A"],
+            rs5370: ["6", 12296255, 12296022, "G"],
+            rs5335: ["4", 148463840, 147542688, "G"],
+            rs28455731: ["6", 121846038, 121524892, "G"],
+            rs5443: ["12", 6954875, 6845711, "C"],
+            rs4262: ["7", 93551428, 93922116, "C"],
+            rs7164883: ["15", 73652174, 73359833, "A"],
+            rs1805127: ["21", 35821821, 34449523, "T"],
+            rs6123471: ["20", 36840156, 38211754, "T"],
+            rs365990: ["14", 23861811, 23392602, "A"],
+            rs4149601: ["18", 55816791, 58149559, "G"],
+            rs2682826: ["12", 117652838, 117215033, "G"],
+            rs12143842: ["1", 162033890, 162064100, "C"],
+            rs2297518: ["17", 26096597, 27769571, "G"],
+            rs1799983: ["7", 150696111, 150999023, "T"],
+            rs2070744: ["7", 150690079, 150992991, "C"],
+            rs3918226: ["7", 150690176, 150993088, "C"],
+            rs5063: ["1", 11907648, 11847591, "C"],
+            rs5065: ["1", 11906068, 11846011, "A"],
+            rs198389: ["1", 11919271, 11859214, "A"],
+            rs2368564: ["1", 204124865, 204155737, "C"],
+            rs4606: ["1", 192781172, 192812042, "C"],
+            rs4899412: ["14", 72464262, 71997545, "T"],
+            rs6795970: ["3", 38766675, 38725184, "A"],
+            rs2228576: ["12", 6457062, 6347896, "T"],
+            rs7980799: ["12", 33576990, 33424055, "A"],
+            rs6791480: ["3", 30480559, 30439067, "C"],
+            rs2106261: ["16", 73051620, 73017721, "C"],
+            rs2856966: ["18", 907710, 907709, "A"],
+            rs685012: ["12", 50446403, 50052620, "C"],
+            rs10875995: ["12", 50462138, 50068355, "T"],
+            rs6478241: ["9", 119252629, 116490350, "A"],
+            rs10167914: ["2", 113563361, 112805784, "A"],
+            rs34626694: ["17", 50260366, 52183006, "C"],
+            rs10405121: ["19", 13339128, 13228314, "G"],
+            rs1006737: ["12", 2345295, 2236129, "G"],
+            rs1003194: ["11", 15126085, 15104539, "A"],
+            rs840562: ["5", 96749206, 97413502, "A"],
+            rs13208321: ["6", 96860354, 96412478, "A"],
+            rs2653349: ["6", 55142337, 55277539, "A"],
+            rs12598836: ["16", 4534482, 4484481, "G"],
+            rs11624776: ["14", 93595591, 93129246, "A"],
+            rs363314: ["10", 118967604, 117208093, "T"],
+            rs10456100: ["6", 39183470, 39215694, "C"],
+            rs734784: ["20", 43723627, 45094986, "T"],
+            rs11172113: ["12", 57527283, 57133500, "T"],
+            rs1925950: ["1", 156450740, 156480948, "G"],
+            rs11031122: ["11", 30547438, 30525891, "T"],
+            rs4910165: ["11", 10674044, 10652497, "C"],
+            rs1835740: ["8", 98166913, 97154685, "T"],
+            rs6330: ["1", 115829313, 115286692, "G"],
+            rs2506142: ["10", 33468124, 33179196, "A"],
+            rs7958311: ["12", 121605355, 121167552, "G"],
+            rs9349379: ["6", 12903957, 12903725, "A"],
+            rs2911463: ["16", 88835545, 88769137, "G"],
+            rs2651899: ["1", 3083712, 3167148, "T"],
+            rs10218452: ["1", 3075597, 3159033, "A"],
+            rs3754701: ["2", 238767204, 237858561, "A"],
+            rs7684253: ["4", 57727311, 56861145, "C"],
+            rs3812718: ["2", 166909544, 166053034, "C"],
+            rs6746030: ["2", 167099158, 166242648, "A"],
+            rs4379368: ["7", 40466200, 40426601, "C"],
+            rs920829: ["8", 72977703, 72065468, "C"],
+            rs11988795: ["8", 72949601, 72037366, "C"],
+            rs10166942: ["2", 234825093, 233916448, "T"],
+            rs8065080: ["17", 3480447, 3577153, "T"],
+            rs3742030: ["12", 110252547, 109814742, "G"],
+            rs2078371: ["1", 115677183, 115134562, "T"],
+            rs2115819: ["10", 45901089, 45405641, "A"],
+            rs1049742: ["7", 150554553, 150857465, "C"],
+            rs1049793: ["7", 150557665, 150860577, "C"],
+            rs2052129: ["7", 150548972, 150851884, "G"],
+            rs10156191: ["7", 150553605, 150856517, "C"],
+            rs9358913: ["6", 26239404, 26239176, "A"],
+            rs1205: ["1", 159682233, 159712443, "C"],
+            rs1130864: ["1", 159683091, 159713301, "G"],
+            rs231775: ["2", 204732714, 203867991, "A"],
+            rs2251746: ["1", 159272060, 159302270, "T"],
+            rs1801274: ["1", 161479745, 161509955, "A"],
+            rs7216389: ["17", 38069949, 39913696, "C"],
+            rs2073440: ["15", 50534514, 50242317, "T"],
+            rs1061235: ["6", 29913298, 29945521, "A"],
+            rs2187668: ["6", 32605884, 32638107, "C"],
+            rs4713586: ["6", 32659582, 32691805, "A"],
+            rs7454108: ["6", 32681483, 32713706, "T"],
+            rs7775228: ["6", 32658079, 32690302, "T"],
+            rs2395182: ["6", 32413317, 32445540, "G"],
+            rs11558538: ["2", 138759649, 138002079, "C"],
+            rs1050891: ["2", 138771760, 138014190, "A"],
+            rs901865: ["3", 11300707, 11259021, "T"],
+            rs2067474: ["5", 175109219, 175682216, "G"],
+            rs3787429: ["20", 60791404, 62216348, "C"],
+            rs11665084: ["18", 22056766, 24476802, "C"],
+            rs1990760: ["2", 163124051, 162267541, "C"],
+            rs2430561: ["12", 68552522, 68158742, "T"],
+            rs1800871: ["1", 206946634, 206773289, "A"],
+            rs1800896: ["1", 206946897, 206773552, "T"],
+            rs20541: ["5", 131995964, 132660272, "A"],
+            rs187238: ["11", 112034988, 112164265, "C"],
+            rs16944: ["2", 113594867, 112837290, "A"],
+            rs1420101: ["2", 102957716, 102341256, "C"],
+            rs419598: ["2", 113887207, 113129630, "T"],
+            rs11209026: ["1", 67705958, 67240275, "G"],
+            rs2104286: ["10", 6099045, 6057082, "T"],
+            rs1342326: ["9", 6190076, 6190076, "A"],
+            rs2243250: ["5", 132009154, 132673462, "C"],
+            rs1801275: ["16", 27374400, 27363079, "A"],
+            rs1800795: ["7", 22766645, 22727026, "C"],
+            rs1800796: ["7", 22766246, 22726627, "G"],
+            rs2228145: ["1", 154426970, 154454494, "A"],
+            rs3822214: ["4", 55593464, 54727298, "A"],
+            rs730012: ["5", 179220638, 179793637, "A"],
+            rs569108: ["11", 59863104, 60095631, "A"],
+            rs1799930: ["8", 18258103, 18400593, "G"],
+            rs1801280: ["8", 18257854, 18400344, "T"],
+            rs12150220: ["17", 5485367, 5582047, "A"],
+            rs35829419: ["1", 247588858, 247425556, "C"],
+            rs2230912: ["12", 121622196, 121184393, "A"],
+            rs3751143: ["12", 121622304, 121184501, "A"],
+            rs1051931: ["6", 46672943, 46705206, "A"],
+            rs5275: ["1", 186643058, 186673926, "A"],
+            rs20417: ["1", 186650321, 186681189, "C"],
+            rs2476601: ["1", 114377568, 113834946, "A"],
+            rs3184504: ["12", 111884608, 111446804, "T"],
+            rs7574865: ["2", 191964633, 191099907, "T"],
+            rs1800469: ["19", 41860296, 41354391, "A"],
+            rs5743708: ["4", 154626317, 153705165, "G"],
+            rs4986790: ["9", 120475302, 117713024, "A"],
+            rs1800629: ["6", 31543031, 31575254, "G"],
+            rs2230926: ["6", 138196066, 137874929, "T"],
+            rs1837253: ["5", 110401872, 111066174, "T"],
+            rs17602729: ["1", 115236057, 114693436, "G"],
+            rs1001179: ["11", 34460231, 34438684, "C"],
+            rs1800561: ["4", 15826558, 15824935, "C"],
+            rs6449182: ["4", 15780453, 15778830, "C"],
+            rs4693075: ["4", 84192168, 83271015, "G"],
+            rs1799821: ["1", 53676448, 53210776, "G"],
+            rs4673: ["16", 88713236, 88646828, "A"],
+            rs8087942: ["18", 55192245, 57525013, "G"],
+            rs17883901: ["6", 53410037, 53545239, "G"],
+            rs41303970: ["1", 94375309, 93909753, "G"],
+            rs1050450: ["3", 49394834, 49357401, "G"],
+            rs713041: ["19", 1106615, 1106616, "T"],
+            rs1002149: ["8", 30585738, 30728221, "G"],
+            rs1801310: ["20", 33517014, 34929211, "A"],
+            rs1695: ["11", 67352689, 67585218, "A"],
+            rs1138272: ["11", 67353579, 67586108, "C"],
+            rs9770242: ["7", 105926331, 106285885, "C"],
+            rs12974991: ["19", 5894584, 5894573, "G"],
+            rs6721961: ["2", 178130037, 177265309, "T"],
+            rs1800566: ["16", 69745145, 69711242, "G"],
+            rs2402970: ["7", 129379801, 129739961, "C"],
+            rs1136410: ["1", 226555302, 226367601, "A"],
+            rs662: ["7", 94937446, 95308134, "T"],
+            rs4253778: ["22", 46630634, 46234737, "G"],
+            rs8192678: ["4", 23815662, 23814039, "C"],
+            rs34713741: ["15", 101817876, 101277671, "C"],
+            rs3758391: ["10", 69643342, 67883584, "T"],
+            rs11246020: ["11", 233067, 233067, "C"],
+            rs1050152: ["5", 131676320, 132340627, "C"],
+            rs2631367: ["5", 131705458, 132369766, "C"],
+            rs2070424: ["21", 33039320, 31667007, "A"],
+            rs4880: ["6", 160113872, 159692840, "A"],
+            rs1799895: ["4", 24801834, 24800212, "C"],
+            rs1937: ["10", 60145342, 58385582, "G"],
+            rs2075650: ["19", 45395619, 44892362, "A"],
+            rs5748469: ["22", 19907099, 19919576, "C"],
+            rs659366: ["11", 73694754, 73983709, "C"],
+            rs1800849: ["11", 73720165, 74009120, "G"],
+            rs73598374: ["20", 43280227, 44651586, "C"],
+            rs3766553: ["1", 203133042, 203163914, "A"],
+            rs5751876: ["22", 24837301, 24441333, "T"],
+            rs2298383: ["22", 24825511, 24429543, "C"],
+            rs4410790: ["7", 17284577, 17244953, "T"],
+            rs2278749: ["11", 13397878, 13376331, "C"],
+            rs3923809: ["6", 38440970, 38473194, "A"],
+            rs1801260: ["4", 56301369, 55435202, "A"],
+            rs4580704: ["4", 56326707, 55460540, "G"],
+            rs184039278: ["12", 107386740, 106992962, "T"],
+            rs10838524: ["11", 45870177, 45848626, "A"],
+            rs135745: ["22", 38683637, 38287631, "G"],
+            rs2472297: ["15", 75027880, 74735539, "C"],
+            rs2271933: ["1", 32092525, 31626924, "A"],
+            rs12593813: ["15", 68036852, 67744514, "A"],
+            rs113851554: ["2", 66750564, 66523432, "G"],
+            rs2300478: ["2", 66781453, 66554321, "T"],
+            rs2119882: ["4", 187476905, 186555751, "T"],
+            rs10830963: ["11", 92708710, 92975544, "C"],
+            rs2305160: ["2", 101591304, 100974842, "A"],
+            rs11541353: ["2", 101594191, 100977729, "C"],
+            rs2675703: ["10", 88414569, 86654812, "C"],
+            rs2735611: ["17", 8048283, 8144965, "G"],
+            rs3027172: ["17", 8055723, 8152405, "A"],
+            rs934945: ["2", 239155053, 238246412, "C"],
+            rs2304672: ["2", 239186589, 238277948, "G"],
+            rs228697: ["1", 7887579, 7827519, "C"],
+            rs139315125: ["1", 7869960, 7809900, "A"],
+            rs150812083: ["1", 7869953, 7809893, "C"],
+            rs1975197: ["9", 8846955, 8846955, "G"],
+            rs11545787: ["17", 17398278, 17494964, "G"],
+            rs774045: ["12", 56838745, 56444961, "G"],
+            rs3104767: ["16", 52624738, 52590826, "G"],
+            rs2267735: ["7", 31135504, 31095890, "C"],
+            rs10473984: ["5", 76267126, 76971301, "G"],
+            rs110402: ["17", 43880047, 45802681, "G"],
+            rs242924: ["17", 43885367, 45808001, "G"],
+            rs7209436: ["17", 43870142, 45792776, "C"],
+            rs2267715: ["7", 30716087, 30676471, "G"],
+            rs743572: ["10", 104597152, 102837395, "A"],
+            rs10046: ["15", 51502986, 51210789, "G"],
+            rs2414096: ["15", 51529779, 51237582, "G"],
+            rs2235544: ["1", 54375570, 53909897, "C"],
+            rs225014: ["14", 80669580, 80203237, "T"],
+            rs945006: ["14", 102029277, 101562940, "T"],
+            rs2234693: ["6", 152163335, 151842200, "T"],
+            rs6557168: ["6", 152201201, 151880066, "C"],
+            rs9340799: ["6", 152163381, 151842246, "A"],
+            rs1256049: ["14", 64724051, 64257333, "C"],
+            rs4986938: ["14", 64699816, 64233098, "C"],
+            rs1360780: ["6", 35607571, 35639794, "T"],
+            rs3800373: ["6", 35542476, 35574699, "C"],
+            rs9296158: ["6", 35567082, 35599305, "A"],
+            rs9470080: ["6", 35646435, 35678658, "T"],
+            rs965513: ["9", 100556109, 97793827, "A"],
+            rs846910: ["1", 209875254, 209701909, "A"],
+            rs12086634: ["1", 209880259, 209706914, "T"],
+            rs5479: ["16", 67469733, 67435830, "C"],
+            rs7799039: ["7", 127878783, 128238730, "G"],
+            rs1137101: ["1", 66058513, 65592830, "A"],
+            rs6190: ["5", 142780337, 143400772, "C"],
+            rs6198: ["5", 142657621, 143278056, "T"],
+            rs41423247: ["5", 142778575, 143399010, "G"],
+            rs56149945: ["5", 142779317, 143399752, "T"],
+            rs5522: ["4", 149357475, 148436323, "C"],
+            rs2070951: ["4", 149358014, 148436862, "G"],
+            rs4704397: ["5", 76518442, 77222617, "G"],
+            rs1042838: ["11", 100933412, 101062681, "C"],
+            rs8042149: ["15", 61124953, 60832754, "T"],
+            rs12589136: ["14", 94793686, 94327349, "G"],
+            rs1799941: ["17", 7533423, 7630105, "G"],
+            rs10770704: ["12", 20855761, 20702827, "T"],
+            rs166050: ["5", 6643847, 6643734, "G"],
+            rs523349: ["2", 31805706, 31580636, "G"],
+            rs1991517: ["14", 81610583, 81144239, "G"],
+            rs6971: ["22", 43558926, 43162920, "A"],
+            rs3764650: ["19", 1046520, 1046521, "T"],
+            rs6551665: ["4", 62739541, 61873823, "G"],
+            rs2494732: ["14", 105239192, 104772855, "T"],
+            rs10994336: ["10", 62179812, 60420054, "C"],
+            rs7412: ["19", 45412079, 44908822, "C"],
+            rs429358: ["19", 45411941, 44908684, "T"],
+            rs6265: ["11", 27679916, 27658369, "C"],
+            rs744373: ["2", 127894615, 127137039, "A"],
+            rs11013860: ["10", 18654027, 18365098, "A"],
+            rs11136000: ["8", 27464519, 27607002, "T"],
+            rs6656401: ["1", 207692049, 207518704, "A"],
+            rs2253206: ["2", 208391978, 207527254, "A"],
+            rs10503253: ["8", 4180844, 4323322, "C"],
+            rs821616: ["1", 232144598, 232008852, "A"],
+            rs7598440: ["2", 212793198, 211928473, "C"],
+            rs9367106: ["6", 41483390, 41515652, "G"],
+            rs76763715: ["1", 155205634, 155235843, "T"],
+            rs334558: ["3", 119813282, 120094435, "A"],
+            rs7713917: ["5", 78829249, 79533426, "A"],
+            rs9536314: ["13", 33628138, 33054001, "T"],
+            rs2179744: ["22", 41621714, 41225710, "G"],
+            rs35936514: ["10", 126244970, 124556401, "C"],
+            rs4904738: ["14", 42179732, 41710529, "T"],
+            rs12023347: ["1", 73768022, 73302339, "T"],
+            rs34637584: ["12", 40734202, 40340400, "G"],
+            rs34778348: ["12", 40757328, 40363526, "G"],
+            rs56226325: ["7", 2078981, 2039346, "C"],
+            rs1052553: ["17", 44073889, 45996523, "A"],
+            rs1064395: ["19", 19361735, 19250926, "G"],
+            rs1432639: ["1", 72813218, 72347535, "C"],
+            rs1812835: ["15", 73507504, 73215163, "C"],
+            rs6994992: ["8", 31495581, 31638065, "C"],
+            rs2289656: ["9", 87563562, 84948647, "G"],
+            rs12552: ["13", 53625781, 53051646, "A"],
+            rs2522833: ["7", 82453708, 82824392, "A"],
+            rs3851179: ["11", 85868640, 86157598, "T"],
+            rs12071663: ["1", 173815290, 173846152, "T"],
+            rs8063603: ["16", 6310645, 6260644, "G"],
+            rs7341475: ["7", 103404815, 103764368, "G"],
+            rs4603973: ["3", 18735206, 18693714, "T"],
+            rs3746544: ["20", 10287084, 10306436, "G"],
+            rs356219: ["4", 90637601, 89716450, "G"],
+            rs11218343: ["11", 121435587, 121564878, "T"],
+            rs9371601: ["6", 152790573, 152469438, "G"],
+            rs9960767: ["18", 53155002, 55487771, "A"],
+            rs10514299: ["5", 87663610, 88367793, "C"],
+            rs9834970: ["3", 36856030, 36814539, "T"],
+            rs75932628: ["6", 41129252, 41161514, "C"],
+            rs17070145: ["5", 167845791, 168418786, "C"],
+            rs1344706: ["2", 185778428, 184913701, "A"],
+            rs12465214: ["2", 185198135, 184333408, "C"],
+            rs4654748: ["1", 21786068, 21459575, "C"],
+            rs662799: ["11", 116663707, 116792991, "G"],
+            rs7501331: ["16", 81314496, 81280891, "C"],
+            rs12934922: ["16", 81301694, 81268089, "A"],
+            rs13078881: ["3", 15686693, 15645186, "G"],
+            rs6013897: ["20", 52742479, 54125940, "T"],
+            rs10877012: ["12", 58162085, 57768302, "G"],
+            rs10741657: ["11", 14914878, 14893332, "A"],
+            rs2108622: ["19", 15990431, 15879621, "C"],
+            rs12785878: ["11", 71167449, 71456403, "G"],
+            rs953413: ["6", 11012859, 11012626, "G"],
+            rs174537: ["11", 61552680, 61785208, "G"],
+            rs174546: ["11", 61569830, 61802358, "C"],
+            rs1535: ["11", 61597972, 61830500, "A"],
+            rs2266780: ["1", 171083242, 171114102, "A"],
+            rs2266782: ["1", 171076966, 171107825, "G"],
+            rs9939609: ["16", 53820527, 53786615, "T"],
+            rs1050828: ["X", 153764217, 154536002, "C"],
+            rs4588: ["4", 72618323, 71752606, "G"],
+            rs7041: ["4", 72618334, 71752617, "A"],
+            rs2282679: ["4", 72608383, 71742666, "T"],
+            rs1260326: ["2", 27730940, 27508073, "T"],
+            rs11676382: ["2", 85777633, 85550510, "C"],
+            rs4988235: ["2", 136608646, 135851076, "G"],
+            rs17782313: ["18", 57851097, 60183864, "T"],
+            rs2010795: ["21", 45172628, 43752747, "G"],
+            rs738409: ["22", 44324727, 43928847, "C"],
+            rs17679445: ["17", 46022065, 47944699, "G"],
+            rs1801282: ["3", 12393125, 12351626, "C"],
+            rs1049434: ["1", 113456546, 112913924, "A"],
+            rs13011437: ["2", 207737069, 206872345, "G"],
+            rs33972313: ["5", 138715502, 139379813, "C"],
+            rs1279683: ["20", 4983092, 5002446, "G"],
+            rs841853: ["1", 43401438, 42935767, "A"],
+            rs3746803: ["20", 744382, 763738, "G"],
+            rs1395: ["2", 27424636, 27201768, "G"],
+            rs7903146: ["10", 114758349, 112998590, "C"],
+            rs58542926: ["19", 19379549, 19268740, "C"],
+            rs6994076: ["8", 63999561, 63087002, "A"],
+            rs731236: ["12", 48238757, 47844974, "A"],
+            rs1544410: ["12", 48239835, 47846052, "C"],
+            rs2228570: ["12", 48272895, 47879112, "A"],
+            rs7975232: ["12", 48238837, 47845054, "C"],
+            rs9923231: ["16", 31107689, 31096368, "C"],
+            rs1800435: ["9", 116153891, 113391611, "C"],
+            rs1061472: ["13", 52524488, 51950352, "T"],
+            rs1801725: ["3", 122003757, 122284910, "G"],
+            rs7914558: ["10", 104775908, 103016151, "G"],
+            rs701753: ["3", 148916235, 149198448, "T"],
+            rs884409: ["2", 172378657, 171522147, "T"],
+            rs10421768: ["19", 35772899, 35281996, "A"],
+            rs1799945: ["6", 26091179, 26090951, "C"],
+            rs1800562: ["6", 26093141, 26092913, "G"],
+            rs1800730: ["6", 26091185, 26090957, "A"],
+            rs4072037: ["1", 155162067, 155192276, "C"],
+            rs7579: ["5", 42800808, 42800706, "C"],
+            rs3877899: ["5", 42801268, 42801166, "C"],
+            rs1776029: ["1", 220080028, 219906686, "A"],
+            rs11126936: ["2", 27483101, 27260233, "G"],
+            rs13266634: ["8", 118184783, 117172544, "C"],
+            rs10981694: ["9", 115986409, 113224129, "T"],
+            rs13107325: ["4", 103188709, 102267552, "C"],
+            rs11568350: ["2", 190430096, 189565370, "C"],
+            rs823156: ["1", 205764640, 205795512, "G"],
+            rs1049296: ["3", 133494354, 133775510, "C"],
+            rs1799852: ["3", 133475722, 133756878, "C"],
+            rs855791: ["22", 37462936, 37066896, "A"],
+            rs2274924: ["9", 77376647, 74761731, "T"],
+            rs3750425: ["9", 77377410, 74762494, "C"],
+            rs8042919: ["15", 50878630, 50586433, "G"],
+            rs1045642: ["7", 87138645, 87509329, "A"],
+            rs1128503: ["7", 87179601, 87550285, "A"],
+            rs2032582: ["7", 87160618, 87531302, "A"],
+            rs2032583: ["7", 87160561, 87531245, "A"],
+            rs2231142: ["4", 89052323, 88131171, "G"],
+            rs1229984: ["4", 100239319, 99318162, "T"],
+            rs671: ["12", 112241766, 111803962, "G"],
+            rs2244613: ["16", 55844609, 55810697, "G"],
+            rs885985: ["22", 19511925, 19524402, "G"],
+            rs762551: ["15", 75041917, 74749576, "C"],
+            rs2069514: ["15", 75038220, 74745879, "G"],
+            rs1056836: ["2", 38298203, 38071060, "C", "G"],
+            rs1801272: ["19", 41354533, 40848628, "A"],
+            rs3745274: ["19", 41512841, 41006936, "G"],
+            rs28399499: ["19", 41518221, 41012316, "T"],
+            rs4244285: ["10", 96541616, 94781859, "G"],
+            rs4986893: ["10", 96540410, 94780653, "G"],
+            rs12248560: ["10", 96521657, 94761900, "C"],
+            rs28399504: ["10", 96522463, 94762706, "A"],
+            rs1057910: ["10", 96741053, 94981296, "A"],
+            rs1799853: ["10", 96702047, 94942290, "C"],
+            rs7900194: ["10", 96702066, 94942309, "G"],
+            rs28371685: ["10", 96740981, 94981224, "C"],
+            rs1065852: ["22", 42526694, 42130692, "G"],
+            rs3892097: ["22", 42524947, 42128945, "C"],
+            rs28371706: ["22", 42525772, 42129770, "G"],
+            rs28371725: ["22", 42523805, 42127803, "C"],
+            rs59421388: ["22", 42523610, 42127608, "C"],
+            rs2031920: ["10", 135339845, 133526341, "C"],
+            rs35599367: ["7", 99366316, 99768693, "G"],
+            rs776746: ["7", 99270539, 99672916, "C", "T"],
+            rs3918290: ["1", 97915614, 97450058, "C"],
+            rs67376798: ["1", 97547947, 97082391, "T"],
+            rs1051740: ["1", 226019633, 225831932, "T"],
+            rs2234922: ["1", 226026406, 225838705, "A"],
+            rs3957357: ["6", 52668687, 52803889, "A"],
+            rs1799931: ["8", 18258370, 18400860, "G"],
+            rs116855232: ["13", 48619855, 48045719, "C"],
+            rs1057868: ["7", 75615006, 75985688, "C"],
+            rs12208357: ["6", 160543148, 160122116, "C"],
+            rs2289669: ["17", 19463343, 19560030, "G"],
+            rs4149056: ["12", 21331549, 21178615, "T"],
+            rs2285162: ["22", 44249463, 43853583, "C"],
+            rs1142345: ["6", 18130918, 18130687, "T"],
+            rs1800460: ["6", 18139228, 18138997, "C"],
+            rs887829: ["2", 234668570, 233759924, "C"],
+            rs2011425: ["2", 234627608, 233718962, "T"],
+            rs1902023: ["4", 69536084, 68670366, "A"],
+            rs6007897: ["22", 46780521, 46384624, "T"],
+            rs1676486: ["1", 103354138, 102888582, "A"],
+            rs970547: ["6", 75797302, 75087586, "C"],
+            rs1800012: ["17", 48277749, 50200388, "C"],
+            rs42524: ["7", 94043239, 94413927, "C"],
+            rs1800255: ["2", 189864080, 188999354, "G"],
+            rs13946: ["9", 137734232, 134842386, "C"],
+            rs2071307: ["7", 73470714, 74056384, "G"],
+            rs10519177: ["15", 48757195, 48464998, "A"],
+            rs143383: ["20", 34025983, 35438203, "A", "G"],
+            rs1800449: ["5", 121413208, 122077513, "C"],
+            rs1048661: ["15", 74219546, 73927205, "G"],
+            rs243865: ["16", 55511806, 55477894, "C"],
+            rs679620: ["11", 102713620, 102842889, "T"],
+            rs3918242: ["20", 44635976, 46007337, "C"],
+            rs185819: ["6", 32050067, 32082290, "T"],
+            rs698: ["4", 100260789, 99339632, "T"],
+            rs34116584: ["2", 241808314, 240868897, "C"],
+            rs4426527: ["2", 241817516, 240878099, "A"],
+            rs1800546: ["9", 104189856, 101427574, "C"],
+            rs2241880: ["2", 234183368, 233274722, "A"],
+            rs10781499: ["9", 139266405, 136371953, "G"],
+            rs11554825: ["2", 219125809, 218261086, "C"],
+            rs2000999: ["16", 72108093, 72074194, "G"],
+            rs13361189: ["5", 150223387, 150843825, "T"],
+            rs1800450: ["10", 54531235, 52771475, "C"],
+            rs5030737: ["10", 54531242, 52771482, "G"],
+            rs7096206: ["10", 54531685, 52771925, "G"],
+            rs2066844: ["16", 50745926, 50712015, "C"],
+            rs2066845: ["16", 50756540, 50722629, "G"],
+            rs188096: ["13", 103705044, 103052694, "A"],
+            rs3733591: ["4", 9922130, 9920506, "C"],
+            rs4263839: ["9", 117566440, 114804160, "A"],
+            rs505922: ["9", 136149229, 133273813, "T", "C"],
+            rs1799963: ["11", 46761055, 46739505, "G"],
+            rs6025: ["1", 169519049, 169549811, "T", "C"],
+            rs1800790: ["4", 155483708, 154562556, "G"],
+            rs5918: ["17", 45360730, 47283364, "T"],
+            rs1063856: ["12", 6153534, 6044368, "T"],
+            rs2236757: ["21", 34624917, 33252612, "A"],
+            rs12979860: ["19", 39738787, 39248147, "C"],
+            rs10774671: ["12", 113357193, 112919388, "G"],
+            rs179008: ["X", 12903659, 12885540, "A"],
+            rs34536443: ["19", 10463118, 10352442, "G"],
+        };
     </script>
 </body>
 
